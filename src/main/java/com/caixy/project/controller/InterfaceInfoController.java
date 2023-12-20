@@ -10,7 +10,6 @@ import com.caixy.project.common.ErrorCode;
 import com.caixy.project.common.ResultUtils;
 import com.caixy.project.constant.CommonConstant;
 import com.caixy.project.exception.BusinessException;
-import com.yupi.project.model.dto.interfaceinfo.*;
 import com.caixy.project.model.entity.InterfaceInfo;
 import com.caixy.project.model.entity.User;
 import com.caixy.project.service.InterfaceInfoService;

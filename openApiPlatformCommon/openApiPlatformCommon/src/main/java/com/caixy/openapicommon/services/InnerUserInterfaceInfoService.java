@@ -18,4 +18,14 @@ public interface InnerUserInterfaceInfoService
      * @version 1.0
      */
     boolean isAllowInvoke(long interfaceId, long userId);
+
+    /**
+     * 更新接口调用次数
+     *
+     * @author CAIXYPROMISE
+     * @version 1.0
+     * @since 2023/12/20 22:29
+     */
+    boolean updateInvokeCount(long interfaceId, long userId);
+
 }

@@ -16,7 +16,7 @@ public class SignUtils
     /**
      * 生成加密后的SecretKey
      *
-     * @param body      请求体
+     * @param nonce      随机数
      * @param timestamp 时间戳
      * @param secretKey 密钥
      * @return 加密后的字符串
@@ -25,10 +25,10 @@ public class SignUtils
      * @update 2023/12/18 20:22
      * @version 1.0
      */
-    public static String encodeSecretKey(String secretKey, String body, Long timestamp)
+    public static String encodeSecretKey(String secretKey, String nonce, Long timestamp)
     {
         Digester md5 = new Digester(DigestAlgorithm.SHA256);
-        String content = body + "." + secretKey + "." + timestamp.toString() + "." + SALT;
+        String content = nonce + "." + secretKey + "." + timestamp.toString() + "." + SALT;
         return md5.digestHex(content);
     }
 
@@ -36,18 +36,17 @@ public class SignUtils
      * 校验生成的SecretKey与原始的Key的区别
      *
      * @param secretKey 原始密钥
-     * @param body      请求体
+     * @param nonce     随机数
      * @param timestamp 时间戳
-     * @param sign      已经加密后的签名
+     * @param signedKey 已经加密后的签名
      * @return 是否相等
      * @author CAIXYPROMISE
      * @CreatedDate 2023/12/18 20:22
      * @updatedDate 2023/12/18 20:22
      * @version 1.0
      */
-    public static boolean validateSecretKey(String secretKey, String body, Long timestamp, String sign)
+    public static boolean validateSecretKey(String secretKey, String nonce, Long timestamp, String signedKey)
     {
-        return encodeSecretKey(secretKey, body, timestamp).equals(sign);
+        return encodeSecretKey(secretKey, nonce, timestamp).equals(signedKey);
     }
-
 }

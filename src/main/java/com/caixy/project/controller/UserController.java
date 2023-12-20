@@ -10,7 +10,6 @@ import com.caixy.project.common.BaseResponse;
 import com.caixy.project.common.DeleteRequest;
 import com.caixy.project.common.ErrorCode;
 import com.caixy.project.common.ResultUtils;
-import com.yupi.project.model.dto.user.*;
 import com.caixy.project.model.entity.User;
 import com.caixy.project.service.UserService;
 import org.apache.commons.lang3.StringUtils;

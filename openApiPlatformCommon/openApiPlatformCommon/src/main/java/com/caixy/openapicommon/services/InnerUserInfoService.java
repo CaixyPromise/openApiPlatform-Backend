@@ -9,16 +9,6 @@ import com.caixy.openapicommon.model.entity.RequestUserInfo;
 public interface InnerUserInfoService
 {
     /**
-     * 检查是否可以调用接口: 检查是否在黑名单中
-     * @author CAIXYPROMISE
-     * @param accessKey 用户accessKey
-     * @return 是否在黑名单中 是 true, 否 false
-     * @since  2023/12/19 18:47
-     * @version 1.0
-     */
-    boolean isInsideBlackList(String accessKey);
-
-    /**
      * 校验用户密钥并返回是否被允许
      * @param userInfo 请求校验的用户信息
      * @return 是否被允许

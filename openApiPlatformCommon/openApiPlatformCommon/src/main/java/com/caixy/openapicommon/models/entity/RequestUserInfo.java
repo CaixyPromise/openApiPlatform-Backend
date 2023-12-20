@@ -36,6 +36,16 @@ public class RequestUserInfo implements Serializable
     private String accessKey;
 
     /**
+    * 请求时间戳
+    * */
+    private String timestamp;
+
+    /**
+     * 请求随机数
+     * */
+    private String nonce;
+
+    /**
      * secretKey
      */
     private String secretKey;
