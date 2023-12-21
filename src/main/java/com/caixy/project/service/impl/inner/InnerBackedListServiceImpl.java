@@ -2,7 +2,7 @@ package com.caixy.project.service.impl.inner;
 
 import com.caixy.openapicommon.services.InnerBackedListService;
 import com.caixy.project.constant.RedisConstant;
-import com.caixy.project.utils.service.RedisService;
+import com.caixy.project.utils.service.RedisOperatorService;
 
 import javax.annotation.Resource;
 
@@ -16,26 +16,26 @@ import javax.annotation.Resource;
 public class InnerBackedListServiceImpl implements InnerBackedListService
 {
     @Resource
-    private RedisService redisService;
+    private RedisOperatorService redisOperatorService;
 
     @Override
     public void recordError(String ip)
     {
         String errorKey = RedisConstant.ERROR_COUNT_PREFIX + ip;
-        if (!redisService.hasKey(errorKey))
+        if (!redisOperatorService.hasKey(errorKey))
         {
-            redisService.setString(errorKey, "1", RedisConstant.ERROR_COUNT_DURATION);
+            redisOperatorService.setString(errorKey, "1", RedisConstant.ERROR_COUNT_DURATION);
         }
         else
         {
-            int errors = Integer.parseInt(redisService.getString(errorKey));
+            int errors = Integer.parseInt(redisOperatorService.getString(errorKey));
             if (errors >= RedisConstant.MAX_ERROR_COUNT)
             {
                 addToBlackList(ip);
             }
             else
             {
-                redisService.setString(errorKey, String.valueOf(errors + 1), RedisConstant.ERROR_COUNT_DURATION);
+                redisOperatorService.setString(errorKey, String.valueOf(errors + 1), RedisConstant.ERROR_COUNT_DURATION);
             }
         }
     }
@@ -43,16 +43,16 @@ public class InnerBackedListServiceImpl implements InnerBackedListService
     @Override
     public void addToBlackList(String ip)
     {
-        redisService.setString(RedisConstant.BACKED_LIST_EXPIRE + ip, "1", RedisConstant.BACKED_LIST_EXPIRE);
+        redisOperatorService.setString(RedisConstant.BACKED_LIST_EXPIRE + ip, "1", RedisConstant.BACKED_LIST_EXPIRE);
     }
 
     @Override
     public boolean isInsideBlackList(String ip)
     {
-        boolean isExist = redisService.hasKey(RedisConstant.BLACKED_IP_PREFIX + ip);
+        boolean isExist = redisOperatorService.hasKey(RedisConstant.BLACKED_IP_PREFIX + ip);
         if (isExist)
         {
-            redisService.refreshExpire(RedisConstant.BLACKED_IP_PREFIX + ip, RedisConstant.BACKED_LIST_EXPIRE);
+            redisOperatorService.refreshExpire(RedisConstant.BLACKED_IP_PREFIX + ip, RedisConstant.BACKED_LIST_EXPIRE);
             return true;
         }
         return false;

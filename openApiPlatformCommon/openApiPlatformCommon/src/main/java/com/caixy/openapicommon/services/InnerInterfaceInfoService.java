@@ -20,4 +20,7 @@ public interface InnerInterfaceInfoService
      * @version 1.0
      */
     Long getInterfaceId(String interfaceName);
+
+
+
 }

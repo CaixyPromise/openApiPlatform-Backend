@@ -1,5 +1,6 @@
 package com.caixy.project.utils.service;
 
+import com.caixy.project.constant.RedisConstant;
 import lombok.AllArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -11,13 +12,13 @@ import java.util.concurrent.TimeUnit;
 /**
  * Redis缓存操作类
  *
- * @name: com.caixy.project.utils.service.RedisService
+ * @name: com.caixy.project.utils.service.RedisOperatorService
  * @author: CAIXYPROMISE
  * @since: 2023-12-20 20:14
  **/
 @Service
 @AllArgsConstructor
-public class RedisService
+public class RedisOperatorService
 {
     private final StringRedisTemplate stringRedisTemplate;
 
@@ -28,9 +29,9 @@ public class RedisService
      * @version 1.0
      * @since 2023/12/0 20:19
      */
-    public void delete(String key)
+    public boolean delete(String key)
     {
-        stringRedisTemplate.delete(key);
+        return Boolean.TRUE.equals(stringRedisTemplate.delete(key));
     }
 
     /**
@@ -116,4 +117,50 @@ public class RedisService
         return Boolean.TRUE.equals(stringRedisTemplate.hasKey(key));
     }
 
+
+    /**
+     * 尝试获取分布式锁
+     *
+     * @param lockKey    锁的Key
+     * @param requestId  请求标识
+     * @param expireTime 过期时间
+     * @return 是否获取成功
+     */
+    public boolean tryGetDistributedLock(String lockKey, String requestId, Long expireTime)
+    {
+        for (int i = 0; i < RedisConstant.MAX_RETRY_TIMES; i++)
+        {
+            Boolean result = stringRedisTemplate.opsForValue().setIfAbsent(lockKey,
+                    requestId, expireTime, TimeUnit.SECONDS);
+            if (result != null && result)
+            {
+                return true;
+            }
+            try
+            {
+                Thread.sleep(RedisConstant.RETRY_INTERVAL);
+            }
+            catch (InterruptedException e)
+            {
+                Thread.currentThread().interrupt();
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 释放分布式锁
+     *
+     * @param lockKey   锁的Key
+     * @param requestId 请求标识
+     * @return 是否释放成功
+     */
+    public boolean releaseDistributedLock(String lockKey, String requestId)
+    {
+        if (requestId.equals(stringRedisTemplate.opsForValue().get(lockKey)))
+        {
+            return delete(lockKey);
+        }
+        return false;
+    }
 }

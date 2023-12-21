@@ -26,6 +26,6 @@ public interface InnerUserInterfaceInfoService
      * @version 1.0
      * @since 2023/12/20 22:29
      */
-    boolean updateInvokeCount(long interfaceId, long userId);
+    boolean updateUserInvokeCount(long interfaceId, long userId, int count);
 
 }

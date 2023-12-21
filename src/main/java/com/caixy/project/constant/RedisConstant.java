@@ -36,9 +36,15 @@ public interface RedisConstant
     // 分布式锁基础定义Key
     String REDIS_LOCK_KEY = "REDIS_LOCK:";
     // 分布式锁定义过期时间
-    Long REDIS_LOCK_EXPIRE = (10L * 60L);
+    Long REDIS_LOCK_EXPIRE = 5L;
+    // 分布式锁最大重试次数
+    int MAX_RETRY_TIMES = 10;
+    // 分布式锁重试间隔时间（毫秒）
+    Long RETRY_INTERVAL = 100L;
 
     // 分布式调用统计锁Key
-    String REDIS_INVOKE_LOCK_KEY = REDIS_LOCK_KEY + "REDIS_INVOKE_LOCK:";
+    String REDIS_INVOKE_LOCK_KEY = REDIS_LOCK_KEY + "REDIS_INVOKE_LOCK";
+
+    Long REDIS_INVOKE_LOCK_EXPIRE_TIME = REDIS_LOCK_EXPIRE;
 
 }

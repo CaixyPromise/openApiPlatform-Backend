@@ -6,8 +6,7 @@ import com.caixy.openapicommon.services.InnerUserInfoService;
 import com.caixy.project.constant.RedisConstant;
 import com.caixy.project.mapper.UserMapper;
 import com.caixy.project.model.entity.User;
-import com.caixy.project.utils.service.RedisService;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import com.caixy.project.utils.service.RedisOperatorService;
 
 import javax.annotation.Resource;
 
@@ -24,7 +23,7 @@ public class InnerUserInfoServiceImpl implements InnerUserInfoService
     private UserMapper userMapper;
 
     @Resource
-    private RedisService redisService;
+    private RedisOperatorService redisOperatorService;
 
     /**
      * 校验用户密钥并返回是否合法
@@ -60,12 +59,12 @@ public class InnerUserInfoServiceImpl implements InnerUserInfoService
         }
         // 2.2 校验nonce
         // 2.2.1 校验nonce是否被使用过
-        if (redisService.hasKey(RedisConstant.NONCE_KEY + nonce))
+        if (redisOperatorService.hasKey(RedisConstant.NONCE_KEY + nonce))
         {
             return false;
         }
         // 2.2.2 没有被使用过就把它插入到redis内
-        redisService.setString(RedisConstant.NONCE_KEY + nonce, nonce, RedisConstant.NONCE_EXPIRE);
+        redisOperatorService.setString(RedisConstant.NONCE_KEY + nonce, nonce, RedisConstant.NONCE_EXPIRE);
 
         // 3. 校验用户信息
         // 3.1 校验accessKey

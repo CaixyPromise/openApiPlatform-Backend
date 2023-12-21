@@ -5,7 +5,9 @@ import com.caixy.openapicommon.services.InnerInterfaceInfoService;
 import com.caixy.project.common.ErrorCode;
 import com.caixy.project.exception.BusinessException;
 import com.caixy.project.mapper.InterfaceInfoMapper;
+import com.caixy.project.mapper.InterfaceInvokeInfoMapper;
 import com.caixy.project.model.entity.InterfaceInfo;
+import com.caixy.project.model.entity.InterfaceInvokeInfo;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Resource;
@@ -38,5 +40,4 @@ public class InnerInterfaceInfoServiceImpl implements InnerInterfaceInfoService
         }
         return -1L;
     }
-
 }

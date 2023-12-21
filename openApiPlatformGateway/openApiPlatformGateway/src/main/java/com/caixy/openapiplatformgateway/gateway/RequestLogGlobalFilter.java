@@ -1,5 +1,6 @@
 package com.caixy.openapiplatformgateway.gateway;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
@@ -17,6 +18,7 @@ import java.util.Objects;
  * @Date: 2023-12-19 16:30
  **/
 @Component
+@Slf4j
 public class RequestLogGlobalFilter implements GlobalFilter, Ordered
 {
     private static final String INTERFACE_HOST = "http://localhost:8123";
@@ -33,13 +35,13 @@ public class RequestLogGlobalFilter implements GlobalFilter, Ordered
         String requestId = request.getId();
         // 获取请求方法
         String method = request.getMethodValue();
-        //
+        log.info("请求日志: path={}, originPath={}, requestId={}, method={}", path, originPath, requestId, method);
         return chain.filter(exchange);
     }
 
     @Override
     public int getOrder()
     {
-        return 0;
+        return 1;
     }
 }
