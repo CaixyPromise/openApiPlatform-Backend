@@ -22,5 +22,4 @@ public interface InnerInterfaceInfoService
     Long getInterfaceId(String interfaceName);
 
 
-
 }
