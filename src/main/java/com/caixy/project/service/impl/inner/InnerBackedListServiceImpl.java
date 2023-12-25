@@ -3,6 +3,7 @@ package com.caixy.project.service.impl.inner;
 import com.caixy.openapicommon.services.InnerBackedListService;
 import com.caixy.project.constant.RedisConstant;
 import com.caixy.project.utils.service.RedisOperatorService;
+import org.apache.dubbo.config.annotation.DubboService;
 
 import javax.annotation.Resource;
 
@@ -13,6 +14,7 @@ import javax.annotation.Resource;
  * @author: CAIXYPROMISE
  * @since: 2023-12-20 21:35
  **/
+@DubboService
 public class InnerBackedListServiceImpl implements InnerBackedListService
 {
     @Resource

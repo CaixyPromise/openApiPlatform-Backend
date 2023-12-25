@@ -9,6 +9,7 @@ import com.caixy.project.mapper.InterfaceInvokeInfoMapper;
 import com.caixy.project.model.entity.InterfaceInfo;
 import com.caixy.project.model.entity.InterfaceInvokeInfo;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.dubbo.config.annotation.DubboService;
 
 import javax.annotation.Resource;
 
@@ -19,20 +20,22 @@ import javax.annotation.Resource;
  * @author: CAIXYPROMISE
  * @since: 2023-12-19 21:28
  **/
+@DubboService
 public class InnerInterfaceInfoServiceImpl implements InnerInterfaceInfoService
 {
     @Resource
     private InterfaceInfoMapper interfaceInfoMapper;
 
     @Override
-    public Long getInterfaceId(String interfaceName)
+    public Long getInterfaceId(String interfaceName, String method)
     {
         if (StringUtils.isBlank(interfaceName))
         {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         QueryWrapper<InterfaceInfo> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("name", interfaceName);
+        queryWrapper.eq("url", interfaceName);
+        queryWrapper.eq("method", method);
         InterfaceInfo result = interfaceInfoMapper.selectOne(queryWrapper);
         if (result != null)
         {

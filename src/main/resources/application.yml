@@ -20,7 +20,7 @@ spring:
     host: 192.168.59.226
     database: 0
 server:
-  port: 7529
+  port: 0
   servlet:
     context-path: /api
 mybatis-plus:
@@ -35,3 +35,14 @@ mybatis-plus:
 
 encryption:
   key: CAIXYRPOMISE
+
+
+dubbo:
+  application:
+    name: dubbo-springboot-demo-provider
+  protocol:
+    name: dubbo
+    port: -1
+  registry:
+    id: nacos-registry
+    address: nacos://localhost:8848

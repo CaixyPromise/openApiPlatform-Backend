@@ -19,7 +19,5 @@ public interface InnerInterfaceInfoService
      * @updatedDate 2023/12/19 18:56
      * @version 1.0
      */
-    Long getInterfaceId(String interfaceName);
-
-
+    Long getInterfaceId(String interfaceName, String method);
 }

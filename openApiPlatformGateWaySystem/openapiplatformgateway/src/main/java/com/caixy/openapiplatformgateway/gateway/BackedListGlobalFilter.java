@@ -3,14 +3,16 @@ package com.caixy.openapiplatformgateway.gateway;
 import com.caixy.openapicommon.services.InnerBackedListService;
 import com.caixy.openapiplatformgateway.common.ErrorCode;
 import com.caixy.openapiplatformgateway.exception.CustomException;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
+import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
-import javax.annotation.Resource;
+import java.util.Objects;
 
 /**
  * 全局黑名单过滤器设计
@@ -19,6 +21,8 @@ import javax.annotation.Resource;
  * @author: CAIXYPROMISE
  * @since: 2023-12-21 22:00
  **/
+@Component
+@Slf4j
 public class BackedListGlobalFilter implements GlobalFilter, Ordered
 {
     @DubboReference
@@ -27,10 +31,10 @@ public class BackedListGlobalFilter implements GlobalFilter, Ordered
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain)
     {
-        String remoteIp =  exchange.getRequest().getRemoteAddress().getAddress().getHostAddress();
+        String remoteIp = Objects.requireNonNull(exchange.getRequest().getRemoteAddress()).getAddress().getHostAddress();
         if (innerBackedListService.isInsideBlackList(remoteIp))
         {
-            return Mono.error(new CustomException(ErrorCode.FORBIDDEN_ERROR, "IP:" + remoteIp + " is in black list"));
+            throw new CustomException(ErrorCode.FORBIDDEN_ERROR, "IP:" + remoteIp + " is in black list");
         }
         return chain.filter(exchange);
     }

@@ -35,6 +35,9 @@ public class RequestLogGlobalFilter implements GlobalFilter, Ordered
         String requestId = request.getId();
         // 获取请求方法
         String method = request.getMethodValue();
+
+        exchange.getAttributes().put("path", path);
+        exchange.getAttributes().put("method", method);
         log.info("请求日志: path={}, originPath={}, requestId={}, method={}", path, originPath, requestId, method);
         return chain.filter(exchange);
     }

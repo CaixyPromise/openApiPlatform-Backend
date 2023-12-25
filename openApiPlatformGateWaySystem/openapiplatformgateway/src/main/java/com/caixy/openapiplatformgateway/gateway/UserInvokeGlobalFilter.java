@@ -1,6 +1,9 @@
 package com.caixy.openapiplatformgateway.gateway;
 
+import com.caixy.openapicommon.services.InnerInterfaceInfoService;
 import com.caixy.openapicommon.services.InnerUserInterfaceInfoService;
+import com.caixy.openapiplatformgateway.common.ErrorCode;
+import com.caixy.openapiplatformgateway.exception.CustomException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.reactivestreams.Publisher;
@@ -13,6 +16,7 @@ import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpResponseDecorator;
+import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -29,15 +33,28 @@ import java.util.List;
  * @since: 2023-12-21 22:42
  **/
 @Slf4j
+@Component
 public class UserInvokeGlobalFilter implements GlobalFilter, Ordered
 {
     @DubboReference
     private InnerUserInterfaceInfoService userInterfaceInfoService;
+    @DubboReference
+    private InnerInterfaceInfoService interfaceInfoService;
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain)
     {
-        return null;
+
+        String method = String.valueOf(exchange.getAttributes().get("method"));
+        String path = String.valueOf(exchange.getAttributes().get("path"));
+        Long interfaceId = interfaceInfoService.getInterfaceId(path, method);
+        Long userId = (Long) exchange.getAttributes().get("userId");
+
+        if (interfaceId == null)
+        {
+           throw new CustomException(ErrorCode.NOT_FOUND_ERROR);
+        }
+        return handleResponse(exchange, chain, interfaceId, userId);
     }
 
     @Override
@@ -71,7 +88,7 @@ public class UserInvokeGlobalFilter implements GlobalFilter, Ordered
                             // 往返回值里写数据
                             // 拼接字符串
                             return super.writeWith(
-                                    fluxBody.map(dataBuffer -> {
+                                    fluxBody.handle((dataBuffer, sink) -> {
                                         // 7. 调用成功，接口调用次数 + 1 invokeCount
                                         try
                                         {
@@ -79,11 +96,13 @@ public class UserInvokeGlobalFilter implements GlobalFilter, Ordered
                                         } catch (Exception e)
                                         {
                                             log.error("invokeCount error", e);
+                                            sink.error(new CustomException(ErrorCode.OPERATION_ERROR));
+                                            return;
                                         }
                                         byte[] content = new byte[dataBuffer.readableByteCount()];
                                         dataBuffer.read(content);
                                         DataBufferUtils.release(dataBuffer);//释放掉内存
-                                        // 构建日志
+                                        // 日志
                                         StringBuilder sb2 = new StringBuilder(200);
                                         List<Object> rspArgs = new ArrayList<>();
                                         rspArgs.add(originalResponse.getStatusCode());
@@ -91,7 +110,7 @@ public class UserInvokeGlobalFilter implements GlobalFilter, Ordered
                                         sb2.append(data);
                                         // 打印日志
                                         log.info("响应结果：" + data);
-                                        return bufferFactory.wrap(content);
+                                        sink.next(bufferFactory.wrap(content));
                                     }));
                         }
                         else

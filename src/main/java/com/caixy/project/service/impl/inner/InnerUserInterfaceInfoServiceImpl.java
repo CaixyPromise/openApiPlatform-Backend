@@ -7,6 +7,7 @@ import com.caixy.project.mapper.UserInterfaceInfoMapper;
 import com.caixy.project.model.entity.UserInterfaceInfo;
 import com.caixy.project.service.UserInterfaceInfoService;
 import com.caixy.project.utils.service.RedisOperatorService;
+import org.apache.dubbo.config.annotation.DubboService;
 
 import javax.annotation.Resource;
 
@@ -17,6 +18,7 @@ import javax.annotation.Resource;
  * @author: CAIXYPROMISE
  * @since: 2023-12-20 22:15
  **/
+@DubboService
 public class InnerUserInterfaceInfoServiceImpl implements InnerUserInterfaceInfoService
 {
     @Resource
