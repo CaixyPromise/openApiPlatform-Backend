@@ -28,6 +28,26 @@ public class InterfaceInfoServiceImpl extends ServiceImpl<InterfaceInfoMapper, I
         implements InterfaceInfoService
 {
 
+    /**
+     * 根据接口id获取接口信息
+     *
+     * @author CAIXYPROMISE
+     * @param interfaceId 接口id
+     * @version 1.0
+     * @since 2023/12/26 16:35
+     */
+    @Override
+    public InterfaceInfo getInterfaceInfo(Long interfaceId)
+    {
+        // 获取接口信息
+        InterfaceInfo interfaceInfo = baseMapper.selectById(interfaceId);
+        if (interfaceInfo == null)
+        {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+        }
+        return interfaceInfo;
+    }
+
     @Override
     public void validInterfaceInfo(InterfaceInfo interfaceInfo, boolean add)
     {

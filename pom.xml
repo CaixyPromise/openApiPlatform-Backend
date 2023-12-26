@@ -9,9 +9,9 @@
         <version>2.7.0</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.yupi</groupId>
+    <groupId>com.caixy</groupId>
     <artifactId>openApiPlatformBackend</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0</version>
     <name>openApiPlatformBackend</name>
     <description>openApiPlatformBackend</description>
     <properties>
@@ -118,6 +118,11 @@
             <groupId>org.apache.dubbo</groupId>
             <artifactId>dubbo</artifactId>
             <version>3.0.9</version>
+        </dependency>
+        <dependency>
+            <groupId>openApiPlatform-client-sdk</groupId>
+            <artifactId>CaixyOpenApiPlatform-client-sdk</artifactId>
+            <version>0.0.1</version>
         </dependency>
 
     </dependencies>

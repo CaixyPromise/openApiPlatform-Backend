@@ -14,6 +14,7 @@ import com.caixy.project.model.entity.InterfaceInfo;
 import com.caixy.project.model.entity.User;
 import com.caixy.project.service.InterfaceInfoService;
 import com.caixy.project.service.UserService;
+import com.openapi.client.client.OpenApiClient;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -238,5 +239,34 @@ public class InterfaceInfoController
         return interfaceInfoService.InterfaceOffline(interfaceInfoOffLineRequest, request);
     }
 
-    // endregion
+    /**
+     * 接口模拟调用逻辑
+     * @param interfaceInfoInvokeRequest 需要模拟请求的接口
+     * @param request 请求载体
+     * @author CAIXYPROMISE
+     * @version 1.0
+     * @since 2023/1226 16:22
+     */
+    @PostMapping("/invoke")
+    public BaseResponse<?> tryToInterfaceInvoke(@RequestBody InterfaceInfoInvokeRequest interfaceInfoInvokeRequest,
+                                           HttpServletRequest request)
+    {
+        // 1. 获取用户信息，并且判断是否登录
+        User currentUser = userService.getLoginUser(request);
+        // 2. 获取接口信息
+        InterfaceInfo interfaceInfo = interfaceInfoService.getInterfaceInfo(interfaceInfoInvokeRequest.getId());
+        // 3. 判断接口是否可用
+        if (interfaceInfo.getStatus().equals(0))    // 接口状态（0-关闭，1-开启）
+        {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR);
+        }
+        // 4. 模拟请求
+        OpenApiClient apiClient = new OpenApiClient(currentUser.getAccessKey(), currentUser.getSecretKey());
+        try {
+            return ResultUtils.success(apiClient.makeRequest(interfaceInfo.getUrl(), interfaceInfo.getMethod(), interfaceInfoInvokeRequest.getUserRequestParams()));
+        }
+        catch (Exception e) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, e.getMessage());
+        }
+    }
 }

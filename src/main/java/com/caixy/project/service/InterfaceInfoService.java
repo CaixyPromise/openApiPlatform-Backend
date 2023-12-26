@@ -20,6 +20,7 @@ public interface InterfaceInfoService extends IService<InterfaceInfo>
 
     BaseResponse<?> InterfaceOnline(InterfaceInfoOnLineRequest info, HttpServletRequest request);
 
+    InterfaceInfo getInterfaceInfo(Long interfaceId);
 
     BaseResponse<?> InterfaceOffline(InterfaceInfoOffLineRequest info, HttpServletRequest request);
 

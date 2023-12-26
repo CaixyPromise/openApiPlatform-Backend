@@ -39,15 +39,15 @@ public class HttpRequest
      *
      * @param body 请求体内容
      */
-    private Map<String, String> makeHeader(String body) throws UnsupportedEncodingException
+    private Map<String, String> makeHeader(Object body) throws UnsupportedEncodingException
     {
         HashMap<String, String> header = new HashMap<>();
         Long timestamp = System.currentTimeMillis() / 1000;
         header.put(UrlConstants.HEADER_KEY_CONTENT_TYPE, "application/json");
         header.put(UrlConstants.HEADER_KEY_ACCESS_KEY, accessKey);
-        header.put(UrlConstants.HEADER_KEY_SECRET_KEY, SignUtils.encodeSecretKey(secretKey, body, timestamp));
+        header.put(UrlConstants.HEADER_KEY_SECRET_KEY, SignUtils.encodeSecretKey(secretKey, body.toString(), timestamp));
         header.put(UrlConstants.HEADER_KEY_TIMESTAMP, timestamp.toString());
-        header.put(UrlConstants.HEADER_KEY_BODY, URLEncoder.encode(body, StandardCharsets.UTF_8));
+        header.put(UrlConstants.HEADER_KEY_BODY, URLEncoder.encode(body.toString(), StandardCharsets.UTF_8));
         return header;
     }
 
@@ -57,13 +57,13 @@ public class HttpRequest
      * @param path 请求路径
      * @param body 请求体内容
      */
-    public boolean requestUsingPost(String path, String body)
+    public boolean requestUsingPost(String path, Object body)
             throws UnsupportedEncodingException
     {
         Map<String, String> header = makeHeader(body);
         httpResponse = cn.hutool.http.HttpRequest.post(UrlConstants.API_HOST + path)
                 .addHeaders(header)
-                .body(body)
+                .body(body.toString())
                 .execute();
         return httpResponse.getStatus() == 200;
     }
@@ -74,13 +74,13 @@ public class HttpRequest
      * @param path 请求路径
      * @param body 请求体内容
      */
-    public boolean requestUsingGet(String path, String body)
+    public boolean requestUsingGet(String path, Object body)
             throws UnsupportedEncodingException
     {
         Map<String, String> header = makeHeader(body);
         httpResponse = cn.hutool.http.HttpRequest.get(UrlConstants.API_HOST + path)
                 .addHeaders(header)
-                .body(body)
+                .body(body.toString())
                 .execute();
         return httpResponse.getStatus() == 200;
     }

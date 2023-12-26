@@ -22,13 +22,15 @@ import java.util.UUID;
 @Aspect
 @Component
 @Slf4j
-public class LogInterceptor {
+public class LogInterceptor
+{
 
     /**
      * 执行拦截
      */
-    @Around("execution(* com.yupi.project.controller.*.*(..))")
-    public Object doInterceptor(ProceedingJoinPoint point) throws Throwable {
+    @Around("execution(* com.caixy.project.controller.*.*(..))")
+    public Object doInterceptor(ProceedingJoinPoint point) throws Throwable
+    {
         // 计时
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();

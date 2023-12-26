@@ -45,7 +45,7 @@ public class OpenApiClient
         return httpResponse.body();
     }
 
-    public  String getUserNameByGet(String name) throws UnsupportedEncodingException
+    public String getUserNameByGet(String name) throws UnsupportedEncodingException
     {
         boolean ret = httpRequest.requestUsingGet("/api/name?name", name);
         if (!ret)
@@ -55,4 +55,24 @@ public class OpenApiClient
         httpResponse = httpRequest.getHttpResponse();
         return httpResponse.body();
     }
+
+    public Object makeRequest(String url, String method, Object body) throws UnsupportedEncodingException
+    {
+        return switch (method.toUpperCase())
+        {
+            case "GET" ->
+            {
+                System.out.println("url" + url);
+                httpRequest.requestUsingGet(url, body);
+                yield httpResponse.body();
+            }
+            case "POST" ->
+            {
+                httpRequest.requestUsingPost(url, body);
+                yield httpResponse.body();
+            }
+            default -> throw new RuntimeException("错误的请求方式");
+        };
+    }
+
 }
