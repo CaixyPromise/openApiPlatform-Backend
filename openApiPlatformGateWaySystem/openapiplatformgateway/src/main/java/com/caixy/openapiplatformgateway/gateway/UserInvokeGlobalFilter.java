@@ -44,13 +44,14 @@ public class UserInvokeGlobalFilter implements GlobalFilter, Ordered
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain)
     {
+        System.out.println("UserInvokeGlobalFilter 执行");
 
         String method = String.valueOf(exchange.getAttributes().get("method"));
         String path = String.valueOf(exchange.getAttributes().get("path"));
         Long interfaceId = interfaceInfoService.getInterfaceId(path, method);
         Long userId = (Long) exchange.getAttributes().get("userId");
 
-        if (interfaceId == null)
+        if (interfaceId == null || userId == null)
         {
            throw new CustomException(ErrorCode.NOT_FOUND_ERROR);
         }
@@ -60,7 +61,7 @@ public class UserInvokeGlobalFilter implements GlobalFilter, Ordered
     @Override
     public int getOrder()
     {
-        return 0;
+        return 3;
     }
 
     public Mono<Void> handleResponse(ServerWebExchange exchange, GatewayFilterChain chain, long interfaceInfoId, long userId)

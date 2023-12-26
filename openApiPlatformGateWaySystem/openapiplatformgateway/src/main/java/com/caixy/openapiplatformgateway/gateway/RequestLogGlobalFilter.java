@@ -25,6 +25,8 @@ public class RequestLogGlobalFilter implements GlobalFilter, Ordered
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain)
     {
+        System.out.println("RequestLogGlobalFilter 执行");
+
         // 1. 写请求日志
         ServerHttpRequest request = exchange.getRequest();
         // 获取请求路径

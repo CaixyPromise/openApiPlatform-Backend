@@ -30,6 +30,7 @@ public class ValidateUserGlobalFilter implements GlobalFilter, Ordered
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain)
     {
+        System.out.println("ValidateUserGlobalFilter 执行");
         // 1. 用户鉴权（判断 ak、sk 是否合法）
         ServerHttpRequest request = exchange.getRequest();
         RequestUserInfo requestUserInfo = getRequestUserInfo(request);

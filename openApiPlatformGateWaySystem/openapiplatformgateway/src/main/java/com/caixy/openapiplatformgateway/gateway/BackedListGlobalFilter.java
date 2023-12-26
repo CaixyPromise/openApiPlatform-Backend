@@ -31,6 +31,7 @@ public class BackedListGlobalFilter implements GlobalFilter, Ordered
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain)
     {
+        System.out.println("BackedListGlobalFilter 执行");
         String remoteIp = Objects.requireNonNull(exchange.getRequest().getRemoteAddress()).getAddress().getHostAddress();
         if (innerBackedListService.isInsideBlackList(remoteIp))
         {
