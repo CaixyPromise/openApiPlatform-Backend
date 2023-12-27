@@ -22,7 +22,7 @@ import java.util.UUID;
 /**
  * 用户服务实现类
  *
- * @author yupi
+ * @author caixy
  */
 @Service
 @Slf4j
@@ -76,8 +76,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             // 2. 加密
             String encryptPassword = passwordToolkit.encodePassword(userPassword);
             // 3. 分配accessKey和secretKey
-            String accessKey = passwordToolkit.encodePassword(SALT + userAccount + UUID.randomUUID().toString());
-            String secretKey = passwordToolkit.encodePassword(SALT + userAccount + String.valueOf(System.currentTimeMillis()));
+            String accessKey = passwordToolkit.makeUserKey(userAccount);
+            String secretKey = passwordToolkit.makeUserKey(userPassword);
             // 4. 插入数据
             User user = new User();
             user.setUserAccount(userAccount);

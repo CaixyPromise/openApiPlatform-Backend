@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 @RestController
@@ -249,7 +250,7 @@ public class InterfaceInfoController
      */
     @PostMapping("/invoke")
     public BaseResponse<?> tryToInterfaceInvoke(@RequestBody InterfaceInfoInvokeRequest interfaceInfoInvokeRequest,
-                                           HttpServletRequest request)
+                                           HttpServletRequest request) throws UnsupportedEncodingException
     {
         // 1. 获取用户信息，并且判断是否登录
         User currentUser = userService.getLoginUser(request);
@@ -260,13 +261,16 @@ public class InterfaceInfoController
         {
             throw new BusinessException(ErrorCode.OPERATION_ERROR);
         }
+        System.out.println("UserName is: " + currentUser);
         // 4. 模拟请求
         OpenApiClient apiClient = new OpenApiClient(currentUser.getAccessKey(), currentUser.getSecretKey());
-        try {
-            return ResultUtils.success(apiClient.makeRequest(interfaceInfo.getUrl(), interfaceInfo.getMethod(), interfaceInfoInvokeRequest.getUserRequestParams()));
-        }
-        catch (Exception e) {
-            throw new BusinessException(ErrorCode.OPERATION_ERROR, e.getMessage());
-        }
+        System.out.println("apiClient userInfo is: " + currentUser );
+        apiClient.makeRequest(interfaceInfo.getUrl(), interfaceInfo.getMethod(), interfaceInfoInvokeRequest.getUserRequestParams());
+        return ResultUtils.success("successfully!!");
+        //        try {
+//            return ResultUtils.success(apiClient.makeRequest(interfaceInfo.getUrl(), interfaceInfo.getMethod(), interfaceInfoInvokeRequest.getUserRequestParams()));
+//        }
+//        catch (Exception e) {
+//            throw new BusinessException(ErrorCode.OPERATION_ERROR, e.getMessage());
     }
 }

@@ -7,7 +7,7 @@ import java.io.Serializable;
 /**
  * 点赞 / 取消点赞请求
  *
- * @author yupi
+ * @author caixy
  */
 @Data
 public class PostDoThumbRequest implements Serializable {

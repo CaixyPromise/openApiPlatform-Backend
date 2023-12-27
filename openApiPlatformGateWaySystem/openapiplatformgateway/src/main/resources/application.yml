@@ -11,10 +11,10 @@ spring:
   cloud:
     gateway:
       default-filters:
-        - AddResponseHeader=source, caixy-api-gateway
+        - AddResponseHeader=from, open-api
       routes:
         - id: caixy-api-gateway
-          uri: http://localhost:8081
+          uri: http://localhost:8090
           predicates:
             - Path=/api/**
 

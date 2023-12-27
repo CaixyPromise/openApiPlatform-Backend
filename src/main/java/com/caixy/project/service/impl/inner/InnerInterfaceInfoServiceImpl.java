@@ -16,7 +16,7 @@ import javax.annotation.Resource;
 /**
  * 内部接口信息远程调用服务实现
  *
- * @name: com.yupi.project.service.impl.inner.InnerInterfaceInfoServiceImpl
+ * @name: com.caixy.project.service.impl.inner.InnerInterfaceInfoServiceImpl
  * @author: CAIXYPROMISE
  * @since: 2023-12-19 21:28
  **/
@@ -27,14 +27,15 @@ public class InnerInterfaceInfoServiceImpl implements InnerInterfaceInfoService
     private InterfaceInfoMapper interfaceInfoMapper;
 
     @Override
-    public Long getInterfaceId(String interfaceName, String method)
+    public Long getInterfaceId(String path, String method)
     {
-        if (StringUtils.isBlank(interfaceName))
+        if (StringUtils.isAnyBlank(path, method))
         {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         QueryWrapper<InterfaceInfo> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("url", interfaceName);
+        System.out.println("path: " + path + " method: " + method);
+        queryWrapper.eq("url", path);
         queryWrapper.eq("method", method);
         InterfaceInfo result = interfaceInfoMapper.selectOne(queryWrapper);
         if (result != null)

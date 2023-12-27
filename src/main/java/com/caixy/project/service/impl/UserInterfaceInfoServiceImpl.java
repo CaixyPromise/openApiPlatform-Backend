@@ -1,6 +1,8 @@
 package com.caixy.project.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.caixy.project.common.ErrorCode;
 import com.caixy.project.exception.BusinessException;
@@ -29,18 +31,16 @@ public class UserInterfaceInfoServiceImpl extends ServiceImpl<UserInterfaceInfoM
     public boolean updateUserInvokeCount(long interfaceId, long userId, int count)
     {
         // 1. 获取现有用户接口调用信息
-        QueryWrapper<UserInterfaceInfo> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("interfaceInfoId", interfaceId);
-        queryWrapper.eq("userId", userId);
-        UserInterfaceInfo userInterfaceInfo = this.getOne(queryWrapper);
-        if (userInterfaceInfo == null)
-        {
+        LambdaUpdateWrapper<UserInterfaceInfo> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(UserInterfaceInfo::getInterfaceInfoId, interfaceId)
+                .eq(UserInterfaceInfo::getUserId, userId)
+                .setSql("total_num = total_num + " + Math.abs(count)) // 直接使用 SQL 语句片段进行更新
+                .setSql("left_num = left_num + " + count);
+
+        boolean updated = this.update(updateWrapper);
+        if (!updated) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
         }
-        // 2. 更新信息
-        userInterfaceInfo.setTotalNum(userInterfaceInfo.getTotalNum() + count);
-        userInterfaceInfo.setLeftNum(userInterfaceInfo.getLeftNum() + count);
-        this.update(userInterfaceInfo, queryWrapper);
         return true;
     }
 }

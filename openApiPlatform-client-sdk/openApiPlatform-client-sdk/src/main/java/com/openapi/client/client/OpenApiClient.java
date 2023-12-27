@@ -1,21 +1,16 @@
 package com.openapi.client.client;
 
 import cn.hutool.http.HttpResponse;
-import com.openapi.client.constants.UrlConstants;
 import com.openapi.client.request.HttpRequest;
 import lombok.Getter;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
 
 
 /**
  * 开放接口Api客户端系统
  * 传入accessKey和secretKey调用指定接口
-* */
+ */
 public class OpenApiClient
 {
     private final String accessKey;
@@ -58,21 +53,26 @@ public class OpenApiClient
 
     public Object makeRequest(String url, String method, Object body) throws UnsupportedEncodingException
     {
-        return switch (method.toUpperCase())
+        try {
+            switch (method.toUpperCase()) {
+                case "GET":
+                    System.out.println("url" + url);
+                    httpRequest.requestUsingGet(url, body);
+                    return httpResponse.body();
+
+                case "POST":
+                    httpRequest.requestUsingPost(url, body);
+                    return httpResponse.body();
+
+                default:
+                    throw new RuntimeException("错误的请求方式");
+            }
+        }
+        catch (Exception e)
         {
-            case "GET" ->
-            {
-                System.out.println("url" + url);
-                httpRequest.requestUsingGet(url, body);
-                yield httpResponse.body();
-            }
-            case "POST" ->
-            {
-                httpRequest.requestUsingPost(url, body);
-                yield httpResponse.body();
-            }
-            default -> throw new RuntimeException("错误的请求方式");
-        };
+            throw new UnsupportedEncodingException("请求失败: " + e.getMessage());
+        }
     }
+
 
 }

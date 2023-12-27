@@ -1,81 +1,68 @@
 package com.caixy.project.service;
 
-import com.caixy.project.model.entity.User;
-import org.junit.jupiter.api.Assertions;
+import cn.hutool.core.util.RandomUtil;
+import cn.hutool.crypto.digest.DigestAlgorithm;
+import cn.hutool.crypto.digest.Digester;
+import com.caixy.openApiPlatformEncryptionAlgorithm.SignUtils;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import javax.annotation.Resource;
+import java.util.Arrays;
 
 /**
  * 用户服务测试
  *
- * @author yupi
+ * @author caixy
  */
-@SpringBootTest
-class UserServiceTest {
+@ExtendWith(SpringExtension.class)
+class UserServiceTest
+{
 
-    @Resource
-    private UserService userService;
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private static final String SALT = "CAIXYPROMISE";
 
     @Test
-    void testAddUser() {
-        User user = new User();
-        boolean result = userService.save(user);
-        System.out.println(user.getId());
-        Assertions.assertTrue(result);
+    public void encodePassword()
+    {
+        String rawPassword = "as123456789";
+        System.out.println(passwordEncoder.encode(rawPassword));
+    }
+
+    public boolean matches(String originPassword, String hashPassword)
+    {
+        return passwordEncoder.matches(originPassword, hashPassword);
     }
 
     @Test
-    void testUpdateUser() {
-        User user = new User();
-        boolean result = userService.updateById(user);
-        Assertions.assertTrue(result);
+    public void makeUserKey()
+    {
+        String content = "caixypromise";
+        Digester md5 = new Digester(DigestAlgorithm.SHA256);
+        StringBuffer stringBuffer = new StringBuffer();
+        stringBuffer.append(SALT)
+                .append(".")
+                .append(content)
+                .append(".")
+                .append(System.currentTimeMillis())
+                .append(".")
+                .append(Arrays.toString(RandomUtil.randomInts(5)));
+//        return  md5.digestHex(stringBuffer.toString());
+        System.out.println(md5.digestHex(stringBuffer.toString()));
     }
 
-    @Test
-    void testDeleteUser() {
-        boolean result = userService.removeById(1L);
-        Assertions.assertTrue(result);
-    }
 
     @Test
-    void testGetUser() {
-        User user = userService.getById(1L);
-        Assertions.assertNotNull(user);
-    }
+    public void test()
+    {
+        Long time = Long.valueOf("1703676640");
+        String nonce = "42013";
+        String content = "7912d7887dd5caaf5b06d03538981876b1216c67b1eb75edd89cebc0f055cdab";
+        String input_content = "17a0396a90e0a122cea50032b06c3d0ee06d0f9961a6a2450ee89760ad7f23c2";
 
-    @Test
-    void userRegister() {
-        String userAccount = "yupi";
-        String userPassword = "";
-        String checkPassword = "123456";
-        try {
-            long result = userService.userRegister(userAccount, userPassword, checkPassword);
-            Assertions.assertEquals(-1, result);
-            userAccount = "yu";
-            result = userService.userRegister(userAccount, userPassword, checkPassword);
-            Assertions.assertEquals(-1, result);
-            userAccount = "yupi";
-            userPassword = "123456";
-            result = userService.userRegister(userAccount, userPassword, checkPassword);
-            Assertions.assertEquals(-1, result);
-            userAccount = "yu pi";
-            userPassword = "12345678";
-            result = userService.userRegister(userAccount, userPassword, checkPassword);
-            Assertions.assertEquals(-1, result);
-            checkPassword = "123456789";
-            result = userService.userRegister(userAccount, userPassword, checkPassword);
-            Assertions.assertEquals(-1, result);
-            userAccount = "dogYupi";
-            checkPassword = "12345678";
-            result = userService.userRegister(userAccount, userPassword, checkPassword);
-            Assertions.assertEquals(-1, result);
-            userAccount = "yupi";
-            result = userService.userRegister(userAccount, userPassword, checkPassword);
-            Assertions.assertEquals(-1, result);
-        } catch (Exception e) {
-
-        }
+        System.out.println(SignUtils.encodeSecretKey(content, nonce, time));
+        String newContent = SignUtils.encodeSecretKey(input_content, nonce, time);
+        System.out.println(SignUtils.encodeSecretKey(newContent, nonce, time));
     }
 }

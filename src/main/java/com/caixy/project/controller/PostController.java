@@ -28,7 +28,7 @@ import java.util.List;
 /**
  * 帖子接口
  *
- * @author yupi
+ * @author caixy
  */
 @RestController
 @RequestMapping("/post")

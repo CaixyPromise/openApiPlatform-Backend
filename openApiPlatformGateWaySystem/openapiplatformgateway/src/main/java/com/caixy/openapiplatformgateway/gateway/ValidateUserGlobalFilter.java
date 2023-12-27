@@ -3,7 +3,9 @@ package com.caixy.openapiplatformgateway.gateway;
 import com.caixy.openapicommon.model.entity.RequestUserInfo;
 import com.caixy.openapicommon.services.InnerUserInfoService;
 import com.caixy.openapiplatformgateway.common.ErrorCode;
+import com.caixy.openapiplatformgateway.constants.UrlConstants;
 import com.caixy.openapiplatformgateway.exception.CustomException;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
@@ -45,17 +47,27 @@ public class ValidateUserGlobalFilter implements GlobalFilter, Ordered
 
     private static RequestUserInfo getRequestUserInfo(ServerHttpRequest request)
     {
+        // 1.获取数据
         HttpHeaders headers = request.getHeaders();
-        String accessKey = headers.getFirst("accessKey");
-        String nonce = headers.getFirst("nonce");
-        String timestamp = headers.getFirst("timestamp");
-        String sign = headers.getFirst("sign");
-        // 2. 填入数据
+        System.out.println(
+                "headers = " + headers
+        );
+        String accessKey = headers.getFirst(UrlConstants.HEADER_KEY_ACCESS_KEY);
+        String nonce = headers.getFirst(UrlConstants.HEADER_KEY_NONCE);
+        String timestamp = headers.getFirst(UrlConstants.HEADER_KEY_TIMESTAMP);
+        String sign = headers.getFirst(UrlConstants.HEADER_KEY_SECRET_KEY);
+        // 2. 检查数据是否为空
+        if (StringUtils.isAnyBlank(accessKey, nonce, timestamp, sign))
+        {
+            throw new CustomException(ErrorCode.PARAMS_ERROR);
+        }
+        // 3. 填入数据
         RequestUserInfo requestUserInfo = new RequestUserInfo();
         requestUserInfo.setAccessKey(accessKey);
         requestUserInfo.setNonce(nonce);
         requestUserInfo.setTimestamp(timestamp);
         requestUserInfo.setSecretKey(sign);
+        System.out.println("requestUserInfo = " + requestUserInfo);
         return requestUserInfo;
     }
 

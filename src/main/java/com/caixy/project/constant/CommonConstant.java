@@ -3,7 +3,7 @@ package com.caixy.project.constant;
 /**
  * 通用常量
  *
- * @author yupi
+ * @author caixy
  */
 public interface CommonConstant {
 

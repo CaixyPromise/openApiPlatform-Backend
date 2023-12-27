@@ -3,7 +3,7 @@ package com.caixy.project.constant;
 /**
  * 用户常量
  *
- * @author yupi
+ * @author caixy
  */
 public interface UserConstant {
 

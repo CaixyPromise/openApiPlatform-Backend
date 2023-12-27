@@ -30,7 +30,7 @@ public class RequestLogGlobalFilter implements GlobalFilter, Ordered
         // 1. 写请求日志
         ServerHttpRequest request = exchange.getRequest();
         // 获取请求路径
-        String path = INTERFACE_HOST + request.getPath().value();
+        String path = request.getPath().value().replaceFirst("^/api", "");;
         // 获取发起请求来源路径
         String originPath = Objects.requireNonNull(request.getRemoteAddress()).getAddress().getHostAddress();
         // 获取请求标识

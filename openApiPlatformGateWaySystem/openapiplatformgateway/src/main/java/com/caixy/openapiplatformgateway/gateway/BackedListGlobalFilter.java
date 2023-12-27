@@ -8,6 +8,7 @@ import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
@@ -37,7 +38,11 @@ public class BackedListGlobalFilter implements GlobalFilter, Ordered
         {
             throw new CustomException(ErrorCode.FORBIDDEN_ERROR, "IP:" + remoteIp + " is in black list");
         }
-        return chain.filter(exchange);
+        // 请求染色
+        ServerHttpRequest request = exchange.getRequest().mutate()
+                .header("source", "api-gateway")
+                .build();
+        return chain.filter(exchange.mutate().request(request).build());
     }
 
     @Override

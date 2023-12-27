@@ -2,9 +2,9 @@ package com.openapi.client.constants;
 
 public interface UrlConstants
 {
-    public static final String API_HOST = "http://localhost:8090/api";
-    public static final String API_VERSION = "v1";
-
+    public static final String API_HOST = "http://localhost:8080/api";
+    public static final String API_SOURCE_FROM = "Source-From";
+    public static final String API_SOURCE_VALUE = "V1-CLI";
     public static final String HEADER_KEY_CONTENT_TYPE = "Content-Type";
     public static final String HEADER_KEY_CONTENT_VALUE = "application/json";
 
@@ -14,4 +14,6 @@ public interface UrlConstants
 
     public static final String HEADER_KEY_TIMESTAMP = "X-OPENAPI-TIMESTAMP";
     public static final String HEADER_KEY_BODY = "X-OPENAPI-BODY";
+
+    public static final String HEADER_KEY_NONCE = "X-OPENAPI-NONCE";
 }

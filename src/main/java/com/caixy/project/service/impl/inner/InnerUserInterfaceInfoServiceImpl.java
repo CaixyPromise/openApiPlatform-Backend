@@ -43,11 +43,14 @@ public class InnerUserInterfaceInfoServiceImpl implements InnerUserInterfaceInfo
     @Override
     public boolean isAllowInvoke(long interfaceId, long userId)
     {
+        System.out.println("interfaceId: " + interfaceId + "userId: " + userId);
         // 获取用户调用次数
         QueryWrapper<UserInterfaceInfo> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("interfaceInfoId", interfaceId)
                 .eq("userId", userId);
         UserInterfaceInfo userInterfaceInfo = userInterfaceInfoMapper.selectOne(queryWrapper);
+        System.out.println("userInterfaceInfo: " + userInterfaceInfo);
+
         return userInterfaceInfo != null && userInterfaceInfo.getLeftNum() > 0;
     }
 

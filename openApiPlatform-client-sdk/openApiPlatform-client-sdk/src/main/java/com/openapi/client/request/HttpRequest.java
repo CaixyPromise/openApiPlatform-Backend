@@ -1,5 +1,6 @@
 package com.openapi.client.request;
 
+import cn.hutool.core.util.RandomUtil;
 import cn.hutool.crypto.SignUtil;
 import cn.hutool.http.HttpResponse;
 import com.caixy.openApiPlatformEncryptionAlgorithm.SignUtils;
@@ -10,6 +11,7 @@ import lombok.Getter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,11 +45,14 @@ public class HttpRequest
     {
         HashMap<String, String> header = new HashMap<>();
         Long timestamp = System.currentTimeMillis() / 1000;
-        header.put(UrlConstants.HEADER_KEY_CONTENT_TYPE, "application/json");
+        String nonce = RandomUtil.randomNumbers(5);
+        header.put(UrlConstants.API_SOURCE_FROM, UrlConstants.API_SOURCE_VALUE);
+        header.put(UrlConstants.HEADER_KEY_CONTENT_TYPE, UrlConstants.HEADER_KEY_CONTENT_VALUE);
         header.put(UrlConstants.HEADER_KEY_ACCESS_KEY, accessKey);
-        header.put(UrlConstants.HEADER_KEY_SECRET_KEY, SignUtils.encodeSecretKey(secretKey, body.toString(), timestamp));
+        header.put(UrlConstants.HEADER_KEY_SECRET_KEY, SignUtils.encodeSecretKey(secretKey, nonce, timestamp));
         header.put(UrlConstants.HEADER_KEY_TIMESTAMP, timestamp.toString());
-        header.put(UrlConstants.HEADER_KEY_BODY, URLEncoder.encode(body.toString(), StandardCharsets.UTF_8));
+        header.put(UrlConstants.HEADER_KEY_NONCE, nonce);
+        header.put(UrlConstants.HEADER_KEY_BODY, URLEncoder.encode(body.toString(), "utf-8"));
         return header;
     }
 

@@ -39,6 +39,7 @@ public class InnerUserInfoServiceImpl implements InnerUserInfoService
     @Override
     public Long verifyUserKey(RequestUserInfo userInfo)
     {
+        System.out.println("Received UserInfo: "+ userInfo);
         // 1. 获取信息
         String accessKey = userInfo.getAccessKey();
         String secretKey = userInfo.getSecretKey();
@@ -50,10 +51,12 @@ public class InnerUserInfoServiceImpl implements InnerUserInfoService
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("accessKey", accessKey);
         User queryUser = userMapper.selectOne(queryWrapper);
+        System.out.println("Search AccessKey..." + accessKey);
         if (queryUser == null)
         {
             return -1L;
         }
+        System.out.println("queryUser = " + queryUser);
         // 2.1 校验timestamp
         // 2.1.1 校验时间戳是否过期
         Long currentTime = System.currentTimeMillis() / 1000;
@@ -61,12 +64,14 @@ public class InnerUserInfoServiceImpl implements InnerUserInfoService
         {
             return -1L;
         }
+        System.out.println("currentTime = " + currentTime);
         // 2.2 校验nonce
         // 2.2.1 校验nonce是否被使用过
         if (redisOperatorService.hasKey(RedisConstant.NONCE_KEY + nonce))
         {
             return -1L;
         }
+        System.out.println("nonce = " + nonce);
         // 2.2.2 没有被使用过就把它插入到redis内
         redisOperatorService.setString(RedisConstant.NONCE_KEY + nonce, nonce, RedisConstant.NONCE_EXPIRE);
 
@@ -76,6 +81,10 @@ public class InnerUserInfoServiceImpl implements InnerUserInfoService
         {
             return -1L;
         }
+        System.out.println("accessKey = " + queryUser.getAccessKey());
+        System.out.println("用户的SecretKey = " + queryUser.getSecretKey());
+        System.out.println("加密后:" + SignUtils.encodeSecretKey(queryUser.getSecretKey(), nonce, timestamp));
+        System.out.println("传入的SecretKey =" + secretKey);
         // 3.2 校验secretKey
         if (!SignUtils.validateSecretKey(queryUser.getSecretKey(),
                 nonce, timestamp,
@@ -83,6 +92,7 @@ public class InnerUserInfoServiceImpl implements InnerUserInfoService
         {
             return -1L;
         }
+        System.out.println("PASS secretKey");
         // 4. 返回用户Id
         return queryUser.getId();
     }
