@@ -5,6 +5,7 @@ import com.openapi.client.request.HttpRequest;
 import lombok.Getter;
 
 import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
 import java.util.Map;
 
 
@@ -28,15 +29,15 @@ public class OpenApiClient
         httpRequest = new HttpRequest(accessKey, secretKey);
     }
 
-    public String makeRequest(String url, String method, Map<String, Object> params, Object body) throws UnsupportedEncodingException
+    public String makeRequest(String url, String method, HashMap<String, Object> payload) throws UnsupportedEncodingException
     {
         try {
             switch (method.toUpperCase())
             {
             case "GET":
-                return httpRequest.requestUsingGet(url, params, body);
+                return httpRequest.requestUsingGet(url, payload);
             case "POST":
-                return httpRequest.requestUsingPost(url, body);
+                return httpRequest.requestUsingPost(url, payload);
             default:
                 throw new RuntimeException("Unsupported request method: " + method);
             }

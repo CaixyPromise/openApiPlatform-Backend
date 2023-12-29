@@ -2,7 +2,7 @@ package com.caixy.project.service.impl.inner;
 
 import com.caixy.openapicommon.services.InnerBackedListService;
 import com.caixy.project.constant.RedisConstant;
-import com.caixy.project.utils.service.RedisOperatorService;
+import com.caixy.project.utils.RedisOperatorService;
 import org.apache.dubbo.config.annotation.DubboService;
 
 import javax.annotation.Resource;

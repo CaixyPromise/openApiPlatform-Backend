@@ -14,9 +14,9 @@ public class InterfaceInfoInvokeRequest implements Serializable
     private Long id;
 
     /**
-     * 用户请求参数
+     * 用户请求载荷: body/params
      */
-    private String userRequestParams;
+    private String userRequestPayload;
 
     private static final long serialVersionUID = 1L;
 }

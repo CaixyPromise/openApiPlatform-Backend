@@ -3,11 +3,11 @@ package com.openapi.client.request;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.http.HttpResponse;
 import com.caixy.openApiPlatformEncryptionAlgorithm.SignUtils;
+import com.google.gson.Gson;
 import com.openapi.client.constants.UrlConstants;
 import lombok.Getter;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,13 +32,10 @@ public class HttpRequest
         this.secretKey = secretKey;
     }
 
-
     /**
      * 生成请求头
-     *
-     * @param body 请求体内容
      */
-    private Map<String, String> makeHeader(Object body) throws UnsupportedEncodingException
+    private Map<String, String> makeHeader() throws UnsupportedEncodingException
     {
         HashMap<String, String> header = new HashMap<>();
         Long timestamp = System.currentTimeMillis() / 1000;
@@ -49,7 +46,6 @@ public class HttpRequest
         header.put(UrlConstants.HEADER_KEY_SECRET_KEY, SignUtils.encodeSecretKey(secretKey, nonce, timestamp));
         header.put(UrlConstants.HEADER_KEY_TIMESTAMP, timestamp.toString());
         header.put(UrlConstants.HEADER_KEY_NONCE, nonce);
-//        header.put(UrlConstants.HEADER_KEY_BODY, URLEncoder.encode(body.toString(), "utf-8"));
         return header;
     }
 
@@ -60,13 +56,15 @@ public class HttpRequest
      * @param body 请求体内容
      */
 
-    public String requestUsingPost(String path, Object body)
+    public String requestUsingPost(String path, HashMap<String, Object> body)
             throws UnsupportedEncodingException
     {
-        Map<String, String> header = makeHeader(body);
+        Map<String, String> header = makeHeader();
+        Gson gson = new Gson();
+
         httpResponse = cn.hutool.http.HttpRequest.post(UrlConstants.API_HOST + path)
                 .addHeaders(header)
-                .body(body.toString())
+                .body(gson.toJson(body))
                 .execute();
         return httpResponse.body();
     }
@@ -75,12 +73,12 @@ public class HttpRequest
      * 使用hutool发起GET请求，传入body发起请求
      *
      * @param path 请求路径
-     * @param body 请求体内容
+     * @param params 请求参数
      */
-    public String requestUsingGet(String path, Map<String, Object> params, Object body)
+    public String requestUsingGet(String path, HashMap<String, Object> params)
             throws UnsupportedEncodingException
     {
-        Map<String, String> header = makeHeader(body);
+        Map<String, String> header = makeHeader();
         String url = UrlConstants.API_HOST + path;
 
         // 添加参数到 URL

@@ -33,7 +33,7 @@ public class InterfaceInfoUpdateRequest implements Serializable {
     /**
      * 请求参数
      */
-    private String requestParams;
+    private String requestPayload;
 
     /**
      * 请求头

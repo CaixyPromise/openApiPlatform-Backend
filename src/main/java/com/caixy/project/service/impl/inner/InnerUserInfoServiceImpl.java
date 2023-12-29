@@ -7,7 +7,7 @@ import com.caixy.openapicommon.services.InnerUserInfoService;
 import com.caixy.project.constant.RedisConstant;
 import com.caixy.project.mapper.UserMapper;
 import com.caixy.project.model.entity.User;
-import com.caixy.project.utils.service.RedisOperatorService;
+import com.caixy.project.utils.RedisOperatorService;
 import org.apache.dubbo.config.annotation.DubboService;
 
 import javax.annotation.Resource;

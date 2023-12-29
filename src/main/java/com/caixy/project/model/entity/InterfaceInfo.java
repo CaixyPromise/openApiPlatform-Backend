@@ -37,9 +37,9 @@ public class InterfaceInfo implements Serializable
     private String url;
 
     /**
-     * 请求参数
+     * 请求载荷：body/params
      */
-    private String requestParams;
+    private String requestPayload;
 
     /**
      * 请求头
@@ -81,6 +81,7 @@ public class InterfaceInfo implements Serializable
      */
     @TableLogic
     private Integer isDelete;
+
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;

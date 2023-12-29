@@ -14,6 +14,7 @@ import com.caixy.project.model.entity.InterfaceInfo;
 import com.caixy.project.model.entity.User;
 import com.caixy.project.service.InterfaceInfoService;
 import com.caixy.project.service.UserService;
+import com.caixy.project.utils.JsonUtils;
 import com.openapi.client.client.OpenApiClient;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -24,6 +25,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -154,6 +156,7 @@ public class InterfaceInfoController
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         InterfaceInfo interfaceInfo = interfaceInfoService.getById(id);
+        log.info("Get interface info by id: {}", interfaceInfo);
         return ResultUtils.success(interfaceInfo);
     }
 
@@ -268,17 +271,12 @@ public class InterfaceInfoController
         OpenApiClient apiClient = new OpenApiClient(currentUser.getAccessKey(), currentUser.getSecretKey());
         System.out.println("apiClient userInfo is: " + currentUser );
         try {
-            String result = apiClient.makeRequest(interfaceInfo.getUrl(), interfaceInfo.getMethod(), null, null);
+            HashMap<String, Object> payloadObject = JsonUtils.jsonToMap(interfaceInfoInvokeRequest.getUserRequestPayload());
+            String result = apiClient.makeRequest(interfaceInfo.getUrl(), interfaceInfo.getMethod(), payloadObject);
             return ResultUtils.success(result);
         }
         catch (Exception e) {
             throw new BusinessException(ErrorCode.OPERATION_ERROR);
         }
-
-        //        try {
-//            return ResultUtils.success(apiClient.makeRequest(interfaceInfo.getUrl(), interfaceInfo.getMethod(), interfaceInfoInvokeRequest.getUserRequestParams()));
-//        }
-//        catch (Exception e) {
-//            throw new BusinessException(ErrorCode.OPERATION_ERROR, e.getMessage());
     }
 }

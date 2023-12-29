@@ -45,6 +45,14 @@ public interface RedisConstant
     // 分布式调用统计锁Key
     String REDIS_INVOKE_LOCK_KEY = REDIS_LOCK_KEY + "REDIS_INVOKE_LOCK";
 
+    //  分布式调用统计排行榜插入锁Key过期时间
+    String REDIS_INVOKE_RANK_LOCK_KEY = REDIS_LOCK_KEY + "REDIS_INVOKE_RANK_LOCK:";
+    // 分布式调用统计锁过期时间
     Long REDIS_INVOKE_LOCK_EXPIRE_TIME = REDIS_LOCK_EXPIRE;
-
+    // 调用接口排名信息的最大容量
+    Long REDIS_INVOKE_RANK_MAX_SIZE = 10L;
+    // 排名信息的Key
+    String REDIS_RANK_KEY = "REDIS_KEY_RANK:";
+    // 调用接口排名信息的Key
+    String REDIS_INVOKE_RANK_KEY = REDIS_RANK_KEY + "INVOKE";
 }

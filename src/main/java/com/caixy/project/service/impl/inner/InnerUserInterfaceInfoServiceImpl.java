@@ -6,7 +6,7 @@ import com.caixy.project.constant.RedisConstant;
 import com.caixy.project.mapper.UserInterfaceInfoMapper;
 import com.caixy.project.model.entity.UserInterfaceInfo;
 import com.caixy.project.service.UserInterfaceInfoService;
-import com.caixy.project.utils.service.RedisOperatorService;
+import com.caixy.project.utils.RedisOperatorService;
 import org.apache.dubbo.config.annotation.DubboService;
 
 import javax.annotation.Resource;

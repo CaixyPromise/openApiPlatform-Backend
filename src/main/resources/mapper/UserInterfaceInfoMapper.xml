@@ -21,4 +21,12 @@
         totalNum,leftNum,status,
         createTime,updateTime,isDelete
     </sql>
+    <select id="listTopInvokeInterfaceInfo" resultType="com.caixy.project.model.entity.UserInterfaceInfo">
+        SELECT interfaceInfoId, sum(totalNum)
+            AS totalNum
+            FROM user_interface_info
+            GROUP BY interfaceInfoId
+            ORDER BY totalNum
+        DESC limit #{limit};
+    </select>
 </mapper>
