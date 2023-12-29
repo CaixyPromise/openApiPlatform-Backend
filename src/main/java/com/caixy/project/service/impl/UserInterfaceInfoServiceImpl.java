@@ -34,7 +34,7 @@ public class UserInterfaceInfoServiceImpl extends ServiceImpl<UserInterfaceInfoM
         LambdaUpdateWrapper<UserInterfaceInfo> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(UserInterfaceInfo::getInterfaceInfoId, interfaceId)
                 .eq(UserInterfaceInfo::getUserId, userId)
-                .setSql("totalNum = totalNum + " + Math.abs(count)) // 直接使用 SQL 语句片段进行更新
+                .setSql("totalNum = totalNum + " + Math.abs(count))
                 .setSql("leftNum = leftNum + " + count);
 
         boolean updated = this.update(updateWrapper);
