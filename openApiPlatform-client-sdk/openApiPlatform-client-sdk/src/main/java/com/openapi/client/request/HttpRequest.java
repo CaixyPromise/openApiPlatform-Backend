@@ -1,17 +1,14 @@
 package com.openapi.client.request;
 
 import cn.hutool.core.util.RandomUtil;
-import cn.hutool.crypto.SignUtil;
 import cn.hutool.http.HttpResponse;
 import com.caixy.openApiPlatformEncryptionAlgorithm.SignUtils;
 import com.openapi.client.constants.UrlConstants;
-
 import lombok.Getter;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -52,7 +49,7 @@ public class HttpRequest
         header.put(UrlConstants.HEADER_KEY_SECRET_KEY, SignUtils.encodeSecretKey(secretKey, nonce, timestamp));
         header.put(UrlConstants.HEADER_KEY_TIMESTAMP, timestamp.toString());
         header.put(UrlConstants.HEADER_KEY_NONCE, nonce);
-        header.put(UrlConstants.HEADER_KEY_BODY, URLEncoder.encode(body.toString(), "utf-8"));
+//        header.put(UrlConstants.HEADER_KEY_BODY, URLEncoder.encode(body.toString(), "utf-8"));
         return header;
     }
 
@@ -62,7 +59,8 @@ public class HttpRequest
      * @param path 请求路径
      * @param body 请求体内容
      */
-    public boolean requestUsingPost(String path, Object body)
+
+    public String requestUsingPost(String path, Object body)
             throws UnsupportedEncodingException
     {
         Map<String, String> header = makeHeader(body);
@@ -70,7 +68,7 @@ public class HttpRequest
                 .addHeaders(header)
                 .body(body.toString())
                 .execute();
-        return httpResponse.getStatus() == 200;
+        return httpResponse.body();
     }
 
     /**
@@ -79,14 +77,21 @@ public class HttpRequest
      * @param path 请求路径
      * @param body 请求体内容
      */
-    public boolean requestUsingGet(String path, Object body)
+    public String requestUsingGet(String path, Map<String, Object> params, Object body)
             throws UnsupportedEncodingException
     {
         Map<String, String> header = makeHeader(body);
-        httpResponse = cn.hutool.http.HttpRequest.get(UrlConstants.API_HOST + path)
+        String url = UrlConstants.API_HOST + path;
+
+        // 添加参数到 URL
+        if (params != null && !params.isEmpty())
+        {
+            url = cn.hutool.http.HttpUtil.urlWithForm(url, params, StandardCharsets.UTF_8, false);
+        }
+
+        httpResponse = cn.hutool.http.HttpRequest.get(url)
                 .addHeaders(header)
-                .body(body.toString())
                 .execute();
-        return httpResponse.getStatus() == 200;
+        return httpResponse.body();
     }
 }

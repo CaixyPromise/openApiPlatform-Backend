@@ -5,6 +5,7 @@ import com.openapi.client.request.HttpRequest;
 import lombok.Getter;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Map;
 
 
 /**
@@ -15,10 +16,8 @@ public class OpenApiClient
 {
     private final String accessKey;
     private final String secretKey;
-
     @Getter
     private HttpResponse httpResponse = null;
-
     private HttpRequest httpRequest = null;
 
 
@@ -29,50 +28,22 @@ public class OpenApiClient
         httpRequest = new HttpRequest(accessKey, secretKey);
     }
 
-    public String getUserNameByPost(String name) throws UnsupportedEncodingException
-    {
-        boolean ret = httpRequest.requestUsingPost("/api/name", name);
-        if (!ret)
-        {
-            throw new UnsupportedEncodingException("请求失败");
-        }
-        httpResponse = httpRequest.getHttpResponse();
-        return httpResponse.body();
-    }
-
-    public String getUserNameByGet(String name) throws UnsupportedEncodingException
-    {
-        boolean ret = httpRequest.requestUsingGet("/api/name?name", name);
-        if (!ret)
-        {
-            throw new UnsupportedEncodingException("请求失败");
-        }
-        httpResponse = httpRequest.getHttpResponse();
-        return httpResponse.body();
-    }
-
-    public Object makeRequest(String url, String method, Object body) throws UnsupportedEncodingException
+    public String makeRequest(String url, String method, Map<String, Object> params, Object body) throws UnsupportedEncodingException
     {
         try {
-            switch (method.toUpperCase()) {
-                case "GET":
-                    System.out.println("url" + url);
-                    httpRequest.requestUsingGet(url, body);
-                    return httpResponse.body();
-
-                case "POST":
-                    httpRequest.requestUsingPost(url, body);
-                    return httpResponse.body();
-
-                default:
-                    throw new RuntimeException("错误的请求方式");
+            switch (method.toUpperCase())
+            {
+            case "GET":
+                return httpRequest.requestUsingGet(url, params, body);
+            case "POST":
+                return httpRequest.requestUsingPost(url, body);
+            default:
+                throw new RuntimeException("Unsupported request method: " + method);
             }
-        }
-        catch (Exception e)
+        } catch (Exception e)
         {
-            throw new UnsupportedEncodingException("请求失败: " + e.getMessage());
+            throw new UnsupportedEncodingException("Request failed: " + e.getMessage());
         }
     }
-
 
 }

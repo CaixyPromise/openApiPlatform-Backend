@@ -23,7 +23,9 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/interfaceInfo")
@@ -265,8 +267,14 @@ public class InterfaceInfoController
         // 4. 模拟请求
         OpenApiClient apiClient = new OpenApiClient(currentUser.getAccessKey(), currentUser.getSecretKey());
         System.out.println("apiClient userInfo is: " + currentUser );
-        apiClient.makeRequest(interfaceInfo.getUrl(), interfaceInfo.getMethod(), interfaceInfoInvokeRequest.getUserRequestParams());
-        return ResultUtils.success("successfully!!");
+        try {
+            String result = apiClient.makeRequest(interfaceInfo.getUrl(), interfaceInfo.getMethod(), null, null);
+            return ResultUtils.success(result);
+        }
+        catch (Exception e) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR);
+        }
+
         //        try {
 //            return ResultUtils.success(apiClient.makeRequest(interfaceInfo.getUrl(), interfaceInfo.getMethod(), interfaceInfoInvokeRequest.getUserRequestParams()));
 //        }
