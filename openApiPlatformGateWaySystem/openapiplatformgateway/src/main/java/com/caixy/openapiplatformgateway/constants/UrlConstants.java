@@ -13,7 +13,10 @@ public interface UrlConstants
     public static final String HEADER_KEY_SECRET_KEY = "X-OPENAPI-SECRET";
 
     public static final String HEADER_KEY_TIMESTAMP = "X-OPENAPI-TIMESTAMP";
-    public static final String HEADER_KEY_BODY = "X-OPENAPI-BODY";
 
     public static final String HEADER_KEY_NONCE = "X-OPENAPI-NONCE";
+
+    public static final String HEADER_KEY_SOURCE = "X-OPENAPI-SOURCE";
+    public static final String HEADER_VALUE_SOURCE = "X-OPENAPI-CLIENT";
+
 }

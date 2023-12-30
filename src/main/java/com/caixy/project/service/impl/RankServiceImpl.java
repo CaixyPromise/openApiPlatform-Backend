@@ -47,7 +47,8 @@ public class RankServiceImpl extends ServiceImpl<UserInterfaceInfoMapper, UserIn
         try
         {
             return redisOperatorService.zAdd(key, value, score);
-        } catch (Exception e)
+        }
+        catch (Exception e)
         {
             // Log exception
             return false;
@@ -115,8 +116,9 @@ public class RankServiceImpl extends ServiceImpl<UserInterfaceInfoMapper, UserIn
         try
         {
             Double score = redisOperatorService.zGetScoreByValue(key, value);
-            return score != null ? score : 0;
-        } catch (Exception e)
+            return score;
+        }
+        catch (Exception e)
         {
             throw new BusinessException(ErrorCode.OPERATION_ERROR);
         }
@@ -137,10 +139,10 @@ public class RankServiceImpl extends ServiceImpl<UserInterfaceInfoMapper, UserIn
         {
             return Collections.emptySet();
         }
-        try
-        {
+        try {
             return redisOperatorService.zReverseRangeWithScore(key);
-        } catch (Exception e)
+        }
+        catch (Exception e)
         {
             throw new BusinessException(ErrorCode.OPERATION_ERROR);
         }

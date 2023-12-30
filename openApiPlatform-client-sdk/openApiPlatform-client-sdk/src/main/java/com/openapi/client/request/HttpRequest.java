@@ -46,6 +46,7 @@ public class HttpRequest
         header.put(UrlConstants.HEADER_KEY_SECRET_KEY, SignUtils.encodeSecretKey(secretKey, nonce, timestamp));
         header.put(UrlConstants.HEADER_KEY_TIMESTAMP, timestamp.toString());
         header.put(UrlConstants.HEADER_KEY_NONCE, nonce);
+        header.put(UrlConstants.HEADER_KEY_SOURCE, UrlConstants.HEADER_VALUE_SOURCE);
         return header;
     }
 
@@ -55,7 +56,6 @@ public class HttpRequest
      * @param path 请求路径
      * @param body 请求体内容
      */
-
     public String requestUsingPost(String path, HashMap<String, Object> body)
             throws UnsupportedEncodingException
     {

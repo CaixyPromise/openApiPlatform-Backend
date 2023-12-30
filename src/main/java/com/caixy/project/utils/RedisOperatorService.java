@@ -82,7 +82,9 @@ public class RedisOperatorService
      */
     public void setHashMap(String key, HashMap<String, Object> data, Long expire)
     {
-        stringRedisTemplate.opsForHash().putAll(key, data);
+        HashMap<String, String> stringData = new HashMap<>();
+        data.forEach((dataKey, value) -> stringData.put(dataKey, JsonUtils.objectToString(value)));
+        stringRedisTemplate.opsForHash().putAll(key, stringData);
         if (expire != null)
         {
             refreshExpire(key, expire);
@@ -247,8 +249,8 @@ public class RedisOperatorService
     /**
      * 检查排行榜大小，并可能移除最低分数的记录
      *
+     * @param key 排行榜名称Key
      * @author CAIXYPROMISE
-     * @param  key 排行榜名称Key
      * @version 1.0
      * @since 2023/1229 23:15
      */
