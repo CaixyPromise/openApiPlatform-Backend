@@ -3,6 +3,7 @@ package com.caixy.project.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.caixy.project.mapper.InterfaceInfoMapper;
+import com.caixy.project.mapper.UserInterfaceInfoMapper;
 import com.caixy.project.model.dto.interfaceinfo.InterfaceInfoOffLineRequest;
 import com.caixy.project.model.dto.interfaceinfo.InterfaceInfoOnLineRequest;
 import com.caixy.project.service.InterfaceInfoService;
@@ -12,9 +13,13 @@ import com.caixy.project.common.ResultUtils;
 import com.caixy.project.exception.BusinessException;
 import com.caixy.project.model.entity.InterfaceInfo;
 import com.caixy.project.model.entity.User;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
+
+import java.util.List;
+import java.util.Set;
 
 import static com.caixy.project.constant.UserConstant.USER_LOGIN_STATE;
 
@@ -24,10 +29,10 @@ import static com.caixy.project.constant.UserConstant.USER_LOGIN_STATE;
  * @createDate 2023-12-10 21:43:05
  */
 @Service
+@AllArgsConstructor
 public class InterfaceInfoServiceImpl extends ServiceImpl<InterfaceInfoMapper, InterfaceInfo>
         implements InterfaceInfoService
 {
-
     /**
      * 根据接口id获取接口信息
      *
@@ -146,6 +151,14 @@ public class InterfaceInfoServiceImpl extends ServiceImpl<InterfaceInfoMapper, I
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
 
         }
+    }
+
+    @Override
+    public List<InterfaceInfo> getInterfaceInfosByIds(Set<Long> interfaceIds)
+    {
+        QueryWrapper<InterfaceInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.in("id", interfaceIds);
+        return this.list(queryWrapper);
     }
 }
 

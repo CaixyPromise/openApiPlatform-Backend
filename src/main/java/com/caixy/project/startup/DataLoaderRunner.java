@@ -36,8 +36,8 @@ public class DataLoaderRunner implements ApplicationRunner
     @Override
     public void run(ApplicationArguments args) throws Exception
     {
-        // 接口调用次数排行榜初始化
-        invokeRankInitial();
+        // 接口调用次数排行榜初始化: 弃用
+//        invokeRankInitial();
     }
 
     /**

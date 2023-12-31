@@ -7,6 +7,8 @@ import com.caixy.project.common.BaseResponse;
 import com.caixy.project.model.entity.InterfaceInfo;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -23,5 +25,5 @@ public interface InterfaceInfoService extends IService<InterfaceInfo>
     InterfaceInfo getInterfaceInfo(Long interfaceId);
 
     BaseResponse<?> InterfaceOffline(InterfaceInfoOffLineRequest info, HttpServletRequest request);
-
+    List<InterfaceInfo> getInterfaceInfosByIds(Set<Long> interfaceIds);
 }

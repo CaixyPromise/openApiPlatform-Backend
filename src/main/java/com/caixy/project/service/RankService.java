@@ -2,8 +2,10 @@ package com.caixy.project.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.caixy.project.model.entity.UserInterfaceInfo;
+import com.caixy.project.model.vo.InterfaceInvokeCountVO;
 import org.springframework.data.redis.core.ZSetOperations;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -24,4 +26,6 @@ public interface RankService extends IService<UserInterfaceInfo>
     double zGetScore(String key, String value);
 
     Set<ZSetOperations.TypedTuple<String>> rankWithScore(String key);
+
+    List<InterfaceInvokeCountVO> getTopInvokeInterfaceInfo(int topLimit);
 }
