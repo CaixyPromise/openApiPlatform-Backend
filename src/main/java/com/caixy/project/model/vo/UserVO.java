@@ -48,6 +48,16 @@ public class UserVO implements Serializable {
     private Date createTime;
 
     /**
+     * accessKey
+     */
+    private String accessKey;
+
+    /**
+     * secretKey
+     */
+    private String secretKey;
+
+    /**
      * 更新时间
      */
     private Date updateTime;

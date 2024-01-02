@@ -16,5 +16,13 @@ public class UserLoginRequest implements Serializable {
 
     private String userAccount;
 
+    private String nonce;
+
+    private String timestamp;
+
+    private String signature;
+
+//    private String
+
     private String userPassword;
 }

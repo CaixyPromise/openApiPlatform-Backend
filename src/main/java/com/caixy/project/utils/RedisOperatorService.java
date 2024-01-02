@@ -75,7 +75,9 @@ public class RedisOperatorService
 
     /**
      * 放入hash类型的数据
-     *
+     * @param key redis-key
+     * @param data 数据
+     * @param expire 过期时间, 单位: 秒
      * @author CAIXYPROMISE
      * @version 1.0
      * @since 2023/12/20 2:16
@@ -83,7 +85,8 @@ public class RedisOperatorService
     public void setHashMap(String key, HashMap<String, Object> data, Long expire)
     {
         HashMap<String, String> stringData = new HashMap<>();
-        data.forEach((dataKey, value) -> stringData.put(dataKey, JsonUtils.objectToString(value)));
+        data.forEach((dataKey, value) ->
+                stringData.put(dataKey, JsonUtils.objectToString(value)));
         stringRedisTemplate.opsForHash().putAll(key, stringData);
         if (expire != null)
         {

@@ -17,6 +17,15 @@ public interface RedisConstant
      * */
     Long NONCE_EXPIRE = (60L * 5L);
 
+    /**
+     * 验证码缓存key
+     * */
+    String CAPTCHA_CODE_KEY = "captcha:";
+    /**
+     * 验证码过期时间：5分钟
+     * */
+    Long CAPTCHA_CODE_EXPIRE = (60L * 5L);
+
     // 黑名单的Key
     String BLACKED_LIST_KEY = "BLACKED_LIST_KEY:";
     // 黑名单过期时间

@@ -3,20 +3,21 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.caixy.project.constant.UserConstant;
 import com.caixy.project.exception.BusinessException;
-import com.caixy.project.utils.PasswordToolkit;
+import com.caixy.project.model.dto.user.UserLoginRequest;
+import com.caixy.project.model.vo.UserVO;
+import com.caixy.project.utils.EncryptionUtils;
 import com.caixy.project.common.ErrorCode;
 import com.caixy.project.mapper.UserMapper;
 import com.caixy.project.model.entity.User;
 import com.caixy.project.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-
-import java.util.UUID;
 
 
 /**
@@ -34,7 +35,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     private UserMapper userMapper;
 
     @Resource
-    private PasswordToolkit passwordToolkit;
+    private EncryptionUtils encryptionUtils;
 
     /**
      * 盐值，混淆密码
@@ -74,10 +75,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
                 throw new BusinessException(ErrorCode.PARAMS_ERROR, "账号重复");
             }
             // 2. 加密
-            String encryptPassword = passwordToolkit.encodePassword(userPassword);
+            String encryptPassword = encryptionUtils.encodePassword(userPassword);
             // 3. 分配accessKey和secretKey
-            String accessKey = passwordToolkit.makeUserKey(userAccount);
-            String secretKey = passwordToolkit.makeUserKey(userPassword);
+            String accessKey = encryptionUtils.makeUserKey(userAccount);
+            String secretKey = encryptionUtils.makeUserKey(userPassword);
             // 4. 插入数据
             User user = new User();
             user.setUserAccount(userAccount);
@@ -94,8 +95,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     }
 
     @Override
-    public User userLogin(String userAccount, String userPassword, HttpServletRequest request)
+    public UserVO userLogin(UserLoginRequest userLoginRequest, HttpServletRequest request)
     {
+        // 0. 提取参数
+        String userAccount = userLoginRequest.getUserAccount();
+        String userPassword = userLoginRequest.getUserPassword();
+        String timestamp = userLoginRequest.getTimestamp();
+        String nonce = userLoginRequest.getNonce();
         // 1. 校验
         if (StringUtils.isAnyBlank(userAccount, userPassword))
         {
@@ -105,12 +111,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "账号错误");
         }
-        if (userPassword.length() < 8)
-        {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "密码错误");
-        }
+
         // 2. 加密
-        String encryptPassword = passwordToolkit.encodePassword(userPassword);
+        // 2.1 先还原密码
+//        String decryptPassword = passwordToolkit.decodePassword(userPassword);
+        String encryptPassword = encryptionUtils.encodePassword(userPassword);
 
         // 查询用户是否存在
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
@@ -123,7 +128,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             log.info("user login failed, userAccount cannot match userPassword");
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户不存在或密码错误");
         }
-        if (!passwordToolkit.matches(userPassword, user.getUserPassword()))
+        if (!encryptionUtils.matches(userPassword, user.getUserPassword()))
         {
             log.info("user login failed, userAccount cannot match userPassword");
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户不存在或密码错误");
@@ -131,7 +136,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         // 登录成功
         // 3. 记录用户的登录态
         request.getSession().setAttribute(UserConstant.USER_LOGIN_STATE, user);
-        return user;
+        UserVO userVo = new UserVO();
+        BeanUtils.copyProperties(user, userVo);
+        return userVo;
     }
 
     /**

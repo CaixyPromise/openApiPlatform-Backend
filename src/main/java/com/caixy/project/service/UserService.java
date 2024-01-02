@@ -2,7 +2,9 @@ package com.caixy.project.service;
 
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.caixy.project.model.dto.user.UserLoginRequest;
 import com.caixy.project.model.entity.User;
+import com.caixy.project.model.vo.UserVO;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -31,7 +33,7 @@ public interface UserService extends IService<User> {
      * @param request
      * @return 脱敏后的用户信息
      */
-    User userLogin(String userAccount, String userPassword, HttpServletRequest request);
+    UserVO userLogin(UserLoginRequest userLoginRequest, HttpServletRequest request);
 
     /**
      * 获取当前登录用户

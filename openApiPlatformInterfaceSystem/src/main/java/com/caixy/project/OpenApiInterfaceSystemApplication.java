@@ -6,10 +6,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 @MapperScan("com.caixy.project.mapper")
-public class MyApplication {
+public class OpenApiInterfaceSystemApplication
+{
 
     public static void main(String[] args) {
-        SpringApplication.run(MyApplication.class, args);
+        SpringApplication.run(OpenApiInterfaceSystemApplication.class, args);
     }
 
 }

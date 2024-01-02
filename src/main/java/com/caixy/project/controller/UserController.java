@@ -68,20 +68,23 @@ public class UserController
      * @return
      */
     @PostMapping("/login")
-    public BaseResponse<User> userLogin(@RequestBody UserLoginRequest userLoginRequest, HttpServletRequest request)
+    public BaseResponse<UserVO> userLogin(@RequestBody UserLoginRequest userLoginRequest, HttpServletRequest request)
     {
         if (userLoginRequest == null)
         {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        String userAccount = userLoginRequest.getUserAccount();
-        String userPassword = userLoginRequest.getUserPassword();
 
-        if (StringUtils.isAnyBlank(userAccount, userPassword))
+
+
+        if (StringUtils.isAnyBlank(userLoginRequest.getUserAccount(),
+                userLoginRequest.getUserPassword(),
+                userLoginRequest.getNonce(),
+                userLoginRequest.getTimestamp()))
         {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        User user = userService.userLogin(userAccount, userPassword, request);
+        UserVO user = userService.userLogin(userLoginRequest, request);
         return ResultUtils.success(user);
     }
 
@@ -182,6 +185,8 @@ public class UserController
         boolean result = userService.updateById(user);
         return ResultUtils.success(result);
     }
+
+
 
     /**
      * 根据 id 获取用户
