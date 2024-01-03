@@ -68,13 +68,13 @@ public class RedisOperatorService
      * @version 1.0
      * @since 2023/1220 20:18
      */
-    public Map<Object, Object> getHash(String key)
+    public Map<Object, Object> getHash(String key, String objectName)
     {
-        return stringRedisTemplate.opsForHash().entries(key);
+        return stringRedisTemplate.opsForHash().entries(key + objectName);
     }
 
     /**
-     * 放入hash类型的数据
+     * 放入hash类型的数据 - Hash<String, Object>
      * @param key redis-key
      * @param data 数据
      * @param expire 过期时间, 单位: 秒
@@ -88,6 +88,15 @@ public class RedisOperatorService
         data.forEach((dataKey, value) ->
                 stringData.put(dataKey, JsonUtils.objectToString(value)));
         stringRedisTemplate.opsForHash().putAll(key, stringData);
+        if (expire != null)
+        {
+            refreshExpire(key, expire);
+        }
+    }
+
+    public void setStringHashMap(String key, HashMap<String, String> data, Long expire)
+    {
+        stringRedisTemplate.opsForHash().putAll(key, data);
         if (expire != null)
         {
             refreshExpire(key, expire);
@@ -118,7 +127,7 @@ public class RedisOperatorService
      *
      * @author CAIXYPROMISE
      * @version 1.0
-     * @since 2023/12/20 2:25
+     * @since 2023/12/20 12:25
      */
     public boolean hasKey(String key)
     {
@@ -126,6 +135,9 @@ public class RedisOperatorService
     }
 
 
+
+
+    // ===================================== 分布式锁 =====================================
     /**
      * 尝试获取分布式锁
      *

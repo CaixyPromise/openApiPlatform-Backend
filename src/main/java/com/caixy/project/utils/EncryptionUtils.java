@@ -11,6 +11,7 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import javax.validation.constraints.NotNull;
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -23,6 +24,7 @@ public class EncryptionUtils
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     private static final String SALT = "CAIXYPROMISE";
 
+    //
     public String encodePassword(String rawPassword)
     {
         return passwordEncoder.encode(rawPassword);
@@ -36,7 +38,7 @@ public class EncryptionUtils
     public String makeUserKey(String content)
     {
         Digester md5 = new Digester(DigestAlgorithm.SHA256);
-        StringBuffer stringBuffer = new StringBuffer();
+        StringBuilder stringBuffer = new StringBuilder();
         stringBuffer.append(SALT)
                 .append(".")
                 .append(content)
@@ -75,7 +77,7 @@ public class EncryptionUtils
         }
     }
 
-    public void makeEncryption(Map<String, Object> dataMap) throws NoSuchAlgorithmException
+    public void makeEncryption(@NotNull Map<String, Object> dataMap) throws NoSuchAlgorithmException
     {
         // 生成AES密钥
         KeyGenerator keyGen = KeyGenerator.getInstance("AES");

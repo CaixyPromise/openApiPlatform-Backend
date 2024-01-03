@@ -26,6 +26,10 @@ public interface RedisConstant
      * */
     Long CAPTCHA_CODE_EXPIRE = (60L * 5L);
 
+    String SIGNATURE_CODE_KEY = "signature:";
+    Long SIGNATURE_CODE_EXPIRE = 60L;
+
+
     // 黑名单的Key
     String BLACKED_LIST_KEY = "BLACKED_LIST_KEY:";
     // 黑名单过期时间

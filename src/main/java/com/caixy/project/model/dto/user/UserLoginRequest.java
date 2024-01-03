@@ -15,13 +15,10 @@ public class UserLoginRequest implements Serializable {
     private static final long serialVersionUID = 3191241716373120793L;
 
     private String userAccount;
-
-    private String nonce;
-
-    private String timestamp;
-
-    private String signature;
-
+    // 验证码的uuid
+    private String captchaId;
+    // 验证码
+    private String captcha;
 //    private String
 
     private String userPassword;

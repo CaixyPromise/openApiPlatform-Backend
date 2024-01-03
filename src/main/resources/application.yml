@@ -45,4 +45,4 @@ dubbo:
     port: -1
   registry:
     id: nacos-registry
-    address: nacos://localhost:9178
+    address: nacos://localhost:8848

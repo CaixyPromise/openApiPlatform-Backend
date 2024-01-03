@@ -11,7 +11,7 @@ import com.caixy.project.common.ResultUtils;
 import com.caixy.project.constant.CommonConstant;
 import com.caixy.project.exception.BusinessException;
 import com.caixy.project.model.entity.InterfaceInfo;
-import com.caixy.project.model.entity.User;
+import com.caixy.project.model.vo.UserVO;
 import com.caixy.project.service.InterfaceInfoService;
 import com.caixy.project.service.UserService;
 import com.caixy.project.utils.JsonUtils;
@@ -24,10 +24,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/interfaceInfo")
@@ -61,7 +59,7 @@ public class InterfaceInfoController
         BeanUtils.copyProperties(interfaceInfoAddRequest, interfaceInfo);
         // 校验
         interfaceInfoService.validInterfaceInfo(interfaceInfo, true);
-        User loginUser = userService.getLoginUser(request);
+        UserVO loginUser = userService.getLoginUser(request);
         interfaceInfo.setUserId(loginUser.getId());
         boolean result = interfaceInfoService.save(interfaceInfo);
         if (!result)
@@ -88,7 +86,7 @@ public class InterfaceInfoController
         {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        User user = userService.getLoginUser(request);
+        UserVO user = userService.getLoginUser(request);
         long id = deleteRequest.getId();
         // 判断是否存在
         InterfaceInfo oldInterfaceInfo = interfaceInfoService.getById(id);
@@ -97,7 +95,7 @@ public class InterfaceInfoController
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
         }
         // 仅本人或管理员可删除
-        if (!oldInterfaceInfo.getUserId().equals(user.getId()) && !userService.isAdmin(request))
+        if (!oldInterfaceInfo.getUserId().equals(user.getId()) && userService.isAdmin(request))
         {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
@@ -125,7 +123,7 @@ public class InterfaceInfoController
         BeanUtils.copyProperties(interfaceInfoUpdateRequest, interfaceInfo);
         // 参数校验
         interfaceInfoService.validInterfaceInfo(interfaceInfo, false);
-        User user = userService.getLoginUser(request);
+        UserVO user = userService.getLoginUser(request);
         long id = interfaceInfoUpdateRequest.getId();
         // 判断是否存在
         InterfaceInfo oldInterfaceInfo = interfaceInfoService.getById(id);
@@ -134,7 +132,7 @@ public class InterfaceInfoController
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
         }
         // 仅本人或管理员可修改
-        if (!oldInterfaceInfo.getUserId().equals(user.getId()) && !userService.isAdmin(request))
+        if (!oldInterfaceInfo.getUserId().equals(user.getId()) && userService.isAdmin(request))
         {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
@@ -258,7 +256,7 @@ public class InterfaceInfoController
                                            HttpServletRequest request) throws UnsupportedEncodingException
     {
         // 1. 获取用户信息，并且判断是否登录
-        User currentUser = userService.getLoginUser(request);
+        UserVO currentUser = userService.getLoginUser(request);
         // 2. 获取接口信息
         InterfaceInfo interfaceInfo = interfaceInfoService.getInterfaceInfo(interfaceInfoInvokeRequest.getId());
         // 3. 判断接口是否可用

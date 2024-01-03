@@ -12,9 +12,11 @@ import java.io.Serializable;
  */
 @Data
 public class UserUpdateRequest implements Serializable {
+    private String token;
     /**
      * id
      */
+
     private Long id;
 
     /**
@@ -46,6 +48,10 @@ public class UserUpdateRequest implements Serializable {
      * 密码
      */
     private String userPassword;
+
+    private String accessKey;
+
+    private String secretKey;
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;

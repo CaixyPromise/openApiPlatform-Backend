@@ -59,7 +59,7 @@ public class CaptchaController
     @GetMapping("/code")
     public BaseResponse<CaptchaVO> getCode(HttpServletRequest request, HttpServletResponse response) throws IOException, NoSuchAlgorithmException
     {
-        HashMap<String, Object> resultMap = new HashMap<>();
+        HashMap<String, String> resultMap = new HashMap<>();
         // 保存验证码信息
         // 生成uuid
         String uuid = UUID.randomUUID().toString();
@@ -102,21 +102,17 @@ public class CaptchaController
 
         resultMap.put("uuid", uuid);
         resultMap.put("code", code);
-        // 生成前端加密密钥
-        encryptionUtils.makeEncryption(resultMap);
 
         // 写入redis
         // 以uuid作为凭证，
         // 并设置过期时间: 5分钟
-        redisOperatorService.setHashMap(RedisConstant.CAPTCHA_CODE_KEY + uuid,
+        redisOperatorService.setStringHashMap(RedisConstant.CAPTCHA_CODE_KEY + uuid,
                 resultMap,
                 RedisConstant.CAPTCHA_CODE_EXPIRE); // 过期时间5分钟
         // 返回Base64的验证码图片信息
         CaptchaVO captchaVO = new CaptchaVO();
         captchaVO.setCodeImage(Base64.encode(os.toByteArray()));
         captchaVO.setUuid(uuid);
-        captchaVO.setKey(resultMap.get("key").toString());
-        captchaVO.setIv(resultMap.get("iv").toString());
         return ResultUtils.success(captchaVO);
     }
 }

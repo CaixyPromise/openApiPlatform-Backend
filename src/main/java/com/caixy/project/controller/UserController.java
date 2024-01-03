@@ -1,10 +1,16 @@
 package com.caixy.project.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
+import com.caixy.project.annotation.AuthCheck;
+import com.caixy.project.constant.RedisConstant;
+import com.caixy.project.constant.UserConstant;
 import com.caixy.project.exception.BusinessException;
+import com.caixy.project.mapper.UserMapper;
 import com.caixy.project.model.dto.user.*;
+import com.caixy.project.model.vo.SignatureVO;
 import com.caixy.project.model.vo.UserVO;
 import com.caixy.project.common.BaseResponse;
 import com.caixy.project.common.DeleteRequest;
@@ -12,6 +18,8 @@ import com.caixy.project.common.ErrorCode;
 import com.caixy.project.common.ResultUtils;
 import com.caixy.project.model.entity.User;
 import com.caixy.project.service.UserService;
+import com.caixy.project.utils.EncryptionUtils;
+import com.caixy.project.utils.RedisOperatorService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -33,6 +42,13 @@ public class UserController
 
     @Resource
     private UserService userService;
+    @Resource
+    private UserMapper userMapper;
+    @Resource
+    private EncryptionUtils encryptionUtils;
+
+    @Resource
+    private RedisOperatorService redisOperatorService;
 
     // region 登录相关
 
@@ -75,12 +91,10 @@ public class UserController
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
 
-
-
         if (StringUtils.isAnyBlank(userLoginRequest.getUserAccount(),
                 userLoginRequest.getUserPassword(),
-                userLoginRequest.getNonce(),
-                userLoginRequest.getTimestamp()))
+                userLoginRequest.getCaptcha(),
+                userLoginRequest.getCaptchaId()))
         {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -114,10 +128,8 @@ public class UserController
     @GetMapping("/get/login")
     public BaseResponse<UserVO> getLoginUser(HttpServletRequest request)
     {
-        User user = userService.getLoginUser(request);
-        UserVO userVO = new UserVO();
-        BeanUtils.copyProperties(user, userVO);
-        return ResultUtils.success(userVO);
+        UserVO user = userService.getLoginUser(request);
+        return ResultUtils.success(user);
     }
 
     // endregion
@@ -156,6 +168,7 @@ public class UserController
      * @return
      */
     @PostMapping("/delete")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<Boolean> deleteUser(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request)
     {
         if (deleteRequest == null || deleteRequest.getId() <= 0)
@@ -180,11 +193,34 @@ public class UserController
         {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
+        // 校验token
+        String token = userUpdateRequest.getToken();
+        // redis校验token
+        if (redisOperatorService.getString(RedisConstant.SIGNATURE_CODE_KEY + token) == null)
+        {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
         User user = new User();
         BeanUtils.copyProperties(userUpdateRequest, user);
         boolean result = userService.updateById(user);
         return ResultUtils.success(result);
     }
+    @GetMapping("/update_key")
+    public BaseResponse<Boolean> updateKey(@RequestParam String token,
+            @RequestParam String name, HttpServletRequest request)
+    {
+        if (token == null || name == null)
+        {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        UserVO curUser = getCurrentUser(request);
+
+
+        return ResultUtils.success(updateUserInfo(token,
+                curUser, name));
+    }
+
+
 
 
 
@@ -255,7 +291,8 @@ public class UserController
         QueryWrapper<User> queryWrapper = new QueryWrapper<>(userQuery);
         Page<User> userPage = userService.page(new Page<>(current, size), queryWrapper);
         Page<UserVO> userVOPage = new PageDTO<>(userPage.getCurrent(), userPage.getSize(), userPage.getTotal());
-        List<UserVO> userVOList = userPage.getRecords().stream().map(user -> {
+        List<UserVO> userVOList = userPage.getRecords().stream().map(user ->
+        {
             UserVO userVO = new UserVO();
             BeanUtils.copyProperties(user, userVO);
             return userVO;
@@ -264,5 +301,66 @@ public class UserController
         return ResultUtils.success(userVOPage);
     }
 
+    /**
+     * 修改用户的accessKey和secretKey信息的签名认证
+     * 只有管理员和自己能够调用
+     *
+     * @author CAIXYPROMISE
+     * @version 1.0
+     * @since 2024/13 19:43
+     */
+    @PostMapping("/signature")
+    public BaseResponse<SignatureVO> getModifyLicense(UserGetLicenseRequest user, HttpServletRequest request)
+    {
+        // 1. 获取用户信息
+        UserVO currentUser = getCurrentUser(request);
+        // 2. 查询用户
+        User userQuery = userMapper.selectById(currentUser.getId());
+        // 3. 校验用户权限，只有用户自己和管理员才能调用
+        if (!userQuery.getId().equals(currentUser.getId()) &&
+            !currentUser.getUserRole().equals(UserConstant.DEFAULT_ROLE))
+        {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
+        // 2. 校验密码
+        if (!encryptionUtils.matches(user.getPassword(), userQuery.getUserPassword()))
+        {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户不存在或密码错误");
+        }
+        // 3. 生成签名
+        String uuid = UUID.randomUUID().toString();
+        // 4. 存入redis
+        redisOperatorService.setString(RedisConstant.SIGNATURE_CODE_KEY + uuid, "1", RedisConstant.SIGNATURE_CODE_EXPIRE);
+        SignatureVO signatureVO = new SignatureVO();
+        signatureVO.setSignature(uuid);
+        return ResultUtils.success(signatureVO);
+    }
     // endregion
+
+    private UserVO getCurrentUser(HttpServletRequest request)
+    {
+        UserVO currentUser = userService.getLoginUser(request);
+        if (currentUser == null)
+        {
+            throw  new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
+        }
+        return currentUser;
+    }
+
+    private boolean updateUserInfo(String token, UserVO curUser, String columnName)
+    {
+        // 校验token
+        // redis校验token
+        if (redisOperatorService.getString(RedisConstant.SIGNATURE_CODE_KEY + token) == null)
+        {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
+        // 校验完就删掉
+        // 防止重复提交
+        redisOperatorService.delete(RedisConstant.SIGNATURE_CODE_KEY + token);
+        return userService.updateUserInfo(curUser.getId(),
+                columnName,
+                encryptionUtils.makeUserKey(curUser.getUserName()));
+    }
+
 }

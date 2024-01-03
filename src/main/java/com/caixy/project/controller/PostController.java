@@ -13,7 +13,7 @@ import com.caixy.project.common.DeleteRequest;
 import com.caixy.project.common.ErrorCode;
 import com.caixy.project.common.ResultUtils;
 import com.caixy.project.model.entity.Post;
-import com.caixy.project.model.entity.User;
+import com.caixy.project.model.vo.UserVO;
 import com.caixy.project.service.PostService;
 import com.caixy.project.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -62,7 +62,7 @@ public class PostController
         BeanUtils.copyProperties(postAddRequest, post);
         // 校验
         postService.validPost(post, true);
-        User loginUser = userService.getLoginUser(request);
+        UserVO loginUser = userService.getLoginUser(request);
         post.setUserId(loginUser.getId());
         boolean result = postService.save(post);
         if (!result)
@@ -87,7 +87,7 @@ public class PostController
         {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        User user = userService.getLoginUser(request);
+        UserVO user = userService.getLoginUser(request);
         long id = deleteRequest.getId();
         // 判断是否存在
         Post oldPost = postService.getById(id);
@@ -96,7 +96,7 @@ public class PostController
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
         }
         // 仅本人或管理员可删除
-        if (!oldPost.getUserId().equals(user.getId()) && !userService.isAdmin(request))
+        if (!oldPost.getUserId().equals(user.getId()) && userService.isAdmin(request))
         {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
@@ -123,7 +123,7 @@ public class PostController
         BeanUtils.copyProperties(postUpdateRequest, post);
         // 参数校验
         postService.validPost(post, false);
-        User user = userService.getLoginUser(request);
+        UserVO user = userService.getLoginUser(request);
         long id = postUpdateRequest.getId();
         // 判断是否存在
         Post oldPost = postService.getById(id);
@@ -132,7 +132,7 @@ public class PostController
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
         }
         // 仅本人或管理员可修改
-        if (!oldPost.getUserId().equals(user.getId()) && !userService.isAdmin(request))
+        if (!oldPost.getUserId().equals(user.getId()) && userService.isAdmin(request))
         {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }

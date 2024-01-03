@@ -28,8 +28,7 @@ public interface UserService extends IService<User> {
     /**
      * 用户登录
      *
-     * @param userAccount  用户账户
-     * @param userPassword 用户密码
+     * @param userLoginRequest 密码body
      * @param request
      * @return 脱敏后的用户信息
      */
@@ -41,7 +40,7 @@ public interface UserService extends IService<User> {
      * @param request
      * @return
      */
-    User getLoginUser(HttpServletRequest request);
+    UserVO getLoginUser(HttpServletRequest request);
 
     /**
      * 是否为管理员
@@ -58,4 +57,6 @@ public interface UserService extends IService<User> {
      * @return
      */
     boolean userLogout(HttpServletRequest request);
+
+    boolean updateUserInfo(Long id, String columnName, String newValue);
 }

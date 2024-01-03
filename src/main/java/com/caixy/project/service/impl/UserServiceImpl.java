@@ -1,6 +1,8 @@
 package com.caixy.project.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.caixy.project.constant.RedisConstant;
 import com.caixy.project.constant.UserConstant;
 import com.caixy.project.exception.BusinessException;
 import com.caixy.project.model.dto.user.UserLoginRequest;
@@ -10,6 +12,7 @@ import com.caixy.project.common.ErrorCode;
 import com.caixy.project.mapper.UserMapper;
 import com.caixy.project.model.entity.User;
 import com.caixy.project.service.UserService;
+import com.caixy.project.utils.RedisOperatorService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -18,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.Map;
 
 
 /**
@@ -30,6 +34,9 @@ import javax.servlet.http.HttpServletRequest;
 public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         implements UserService
 {
+
+    @Resource
+    private RedisOperatorService redisOperatorService;
 
     @Resource
     private UserMapper userMapper;
@@ -100,10 +107,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         // 0. 提取参数
         String userAccount = userLoginRequest.getUserAccount();
         String userPassword = userLoginRequest.getUserPassword();
-        String timestamp = userLoginRequest.getTimestamp();
-        String nonce = userLoginRequest.getNonce();
+        String captcha = userLoginRequest.getCaptcha().trim();
+        String captchaId = userLoginRequest.getCaptchaId();
         // 1. 校验
-        if (StringUtils.isAnyBlank(userAccount, userPassword))
+        // 1.1 检查参数是否完整
+        if (StringUtils.isAnyBlank(userAccount, userPassword, captcha, captchaId))
         {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
         }
@@ -111,16 +119,26 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "账号错误");
         }
+        // 1.2 校验验证码
+        Map<Object, Object> result = redisOperatorService.getHash(RedisConstant.CAPTCHA_CODE_KEY, captchaId);
+        if (result == null || result.isEmpty())
+        {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "验证码错误");
+        }
+        String redisCode = result.get("code").toString().trim();
+        String redisUuid = (String) result.get("uuid");
+        redisOperatorService.delete(RedisConstant.CAPTCHA_CODE_KEY + redisUuid);
+        // 验证码不区分大小写
+        if (!redisCode.equalsIgnoreCase(captcha.trim()))
+        {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "验证码错误");
+        }
 
         // 2. 加密
-        // 2.1 先还原密码
-//        String decryptPassword = passwordToolkit.decodePassword(userPassword);
-        String encryptPassword = encryptionUtils.encodePassword(userPassword);
 
         // 查询用户是否存在
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("userAccount", userAccount);
-//        queryWrapper.eq("userPassword", encryptPassword);
         User user = userMapper.selectOne(queryWrapper);
         // 用户不存在
         if (user == null)
@@ -133,11 +151,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             log.info("user login failed, userAccount cannot match userPassword");
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户不存在或密码错误");
         }
-        // 登录成功
         // 3. 记录用户的登录态
-        request.getSession().setAttribute(UserConstant.USER_LOGIN_STATE, user);
+
         UserVO userVo = new UserVO();
         BeanUtils.copyProperties(user, userVo);
+        request.getSession().setAttribute(UserConstant.USER_LOGIN_STATE, userVo);
+        // 登录成功
         return userVo;
     }
 
@@ -148,11 +167,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
      * @return
      */
     @Override
-    public User getLoginUser(HttpServletRequest request)
+    public UserVO getLoginUser(HttpServletRequest request)
     {
         // 先判断是否已登录
         Object userObj = request.getSession().getAttribute(UserConstant.USER_LOGIN_STATE);
-        User currentUser = (User) userObj;
+        UserVO currentUser = (UserVO) userObj;
         if (currentUser == null || currentUser.getId() == null)
         {
             throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
@@ -172,7 +191,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         // 仅管理员可查询
         Object userObj = request.getSession().getAttribute(UserConstant.USER_LOGIN_STATE);
         User user = (User) userObj;
-        return user != null && UserConstant.ADMIN_ROLE.equals(user.getUserRole());
+        return user == null || !UserConstant.ADMIN_ROLE.equals(user.getUserRole());
     }
 
     /**
@@ -190,6 +209,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         // 移除登录态
         request.getSession().removeAttribute(UserConstant.USER_LOGIN_STATE);
         return true;
+    }
+
+    @Override
+    public boolean updateUserInfo(Long id, String columnName, String newValue)
+    {
+        UpdateWrapper<User> userUpdateWrapper = new UpdateWrapper<>();
+        userUpdateWrapper.eq("id", id);
+        // 直接更新columnName字段， 放入newValue
+        userUpdateWrapper.set(columnName, newValue);
+        return userMapper.update(null, userUpdateWrapper) > 0;
     }
 
 }
