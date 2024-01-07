@@ -9,8 +9,6 @@ import java.io.Serializable;
 /**
  * 查询请求
  *
- * @author <a href="https://github.com/licaixy">程序员鱼皮</a>
- * @from <a href="https://caixy.icu">编程导航知识星球</a>
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -58,6 +56,11 @@ public class InterfaceInfoQueryRequest extends PageRequest implements Serializab
      * 请求类型
      */
     private String method;
+
+    /**
+     * 预期响应结果
+     * */
+    private String responsePayload;
 
     /**
      * 创建人

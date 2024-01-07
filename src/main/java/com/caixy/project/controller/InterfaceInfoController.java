@@ -2,6 +2,7 @@ package com.caixy.project.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.caixy.project.manager.RedisLimiterManager;
 import com.caixy.project.model.dto.interfaceinfo.*;
 import com.caixy.project.annotation.AuthCheck;
 import com.caixy.project.common.BaseResponse;
@@ -39,6 +40,10 @@ public class InterfaceInfoController
     @Resource
     private UserService userService;
 
+    @Resource
+    private RedisLimiterManager redisLimiterManager;
+
+
     // region 增删改查
 
     /**
@@ -49,7 +54,7 @@ public class InterfaceInfoController
      * @return
      */
     @PostMapping("/add")
-    public BaseResponse<Long> addInterfaceInfo(@RequestBody InterfaceInfoAddRequest interfaceInfoAddRequest, HttpServletRequest request)
+    public BaseResponse<String> addInterfaceInfo(@RequestBody InterfaceInfoAddRequest interfaceInfoAddRequest, HttpServletRequest request)
     {
         if (interfaceInfoAddRequest == null)
         {
@@ -58,16 +63,25 @@ public class InterfaceInfoController
         InterfaceInfo interfaceInfo = new InterfaceInfo();
         BeanUtils.copyProperties(interfaceInfoAddRequest, interfaceInfo);
         // 校验
-        interfaceInfoService.validInterfaceInfo(interfaceInfo, true);
+        log.info("Add interfaceInfo:{}", interfaceInfoAddRequest);
+        log.info("CopyProperties interfaceInfo:{}", interfaceInfo);
+        interfaceInfoService.validInterfaceInfo(interfaceInfoAddRequest);
         UserVO loginUser = userService.getLoginUser(request);
         interfaceInfo.setUserId(loginUser.getId());
+        interfaceInfo.setRequestHeader(JsonUtils.objectToString(interfaceInfoAddRequest.getRequestHeader()));
+        interfaceInfo.setRequestPayload(JsonUtils.objectToString(interfaceInfoAddRequest.getRequestPayload()));
+        interfaceInfo.setResponseHeader(JsonUtils.objectToString(interfaceInfoAddRequest.getResponseHeader()));
+        interfaceInfo.setResponsePayload(JsonUtils.objectToString(interfaceInfoAddRequest.getResponsePayload()));
+        log.info("copy result is: {}", interfaceInfo);
+//        UserVO loginUser = userService.getLoginUser(request);
+//        interfaceInfo.setUserId(loginUser.getId());
         boolean result = interfaceInfoService.save(interfaceInfo);
         if (!result)
         {
             throw new BusinessException(ErrorCode.OPERATION_ERROR);
         }
-        long newInterfaceInfoId = interfaceInfo.getId();
-        return ResultUtils.success(newInterfaceInfoId);
+
+        return ResultUtils.success("添加接口信息成功");
     }
 
     /**
@@ -122,7 +136,7 @@ public class InterfaceInfoController
         InterfaceInfo interfaceInfo = new InterfaceInfo();
         BeanUtils.copyProperties(interfaceInfoUpdateRequest, interfaceInfo);
         // 参数校验
-        interfaceInfoService.validInterfaceInfo(interfaceInfo, false);
+//        interfaceInfoService.validInterfaceInfo(interfaceInfo);
         UserVO user = userService.getLoginUser(request);
         long id = interfaceInfoUpdateRequest.getId();
         // 判断是否存在
@@ -262,13 +276,15 @@ public class InterfaceInfoController
         // 3. 判断接口是否可用
         if (interfaceInfo.getStatus().equals(0))    // 接口状态（0-关闭，1-开启）
         {
-            throw new BusinessException(ErrorCode.OPERATION_ERROR);
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "接口已关闭或不存在");
         }
-        System.out.println("UserName is: " + currentUser);
+        log.info("UserName is: {}", currentUser);
         // 4. 模拟请求
         OpenApiClient apiClient = new OpenApiClient(currentUser.getAccessKey(), currentUser.getSecretKey());
-        System.out.println("apiClient userInfo is: " + currentUser );
+        log.info("apiClient userInfo is: {}", currentUser);
+
         try {
+            redisLimiterManager.doRateLimiter(String.valueOf(currentUser.getId()));
             HashMap<String, Object> payloadObject = JsonUtils.jsonToMap(interfaceInfoInvokeRequest.getUserRequestPayload());
             String result = apiClient.makeRequest(interfaceInfo.getUrl(), interfaceInfo.getMethod(), payloadObject);
             return ResultUtils.success(result);

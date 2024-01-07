@@ -1,16 +1,16 @@
 package com.caixy.project.model.dto.interfaceinfo;
 
+import com.caixy.project.model.param.HeaderParam;
+import com.caixy.project.model.param.PayloadParam;
 import lombok.Data;
 
 import java.io.Serializable;
-
+import java.util.List;
 
 
 @Data
 public class InterfaceInfoAddRequest implements Serializable
 {
-
-
     /**
      * 名称
      */
@@ -29,17 +29,22 @@ public class InterfaceInfoAddRequest implements Serializable
     /**
      * 请求参数
      */
-    private String requestPayload;
+    private List<PayloadParam> requestPayload;
 
     /**
      * 请求头
      */
-    private String requestHeader;
+    private List<HeaderParam> requestHeader;
 
     /**
      * 响应头
      */
-    private String responseHeader;
+    private List<HeaderParam> responseHeader;
+
+    /**
+     * 预期响应结果
+     */
+    private List<PayloadParam> responsePayload;
 
 
     /**

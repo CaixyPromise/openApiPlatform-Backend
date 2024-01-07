@@ -1,10 +1,13 @@
 package com.caixy.project.model.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.caixy.project.model.param.HeaderParam;
+import com.caixy.project.model.param.PayloadParam;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 接口信息
@@ -65,6 +68,11 @@ public class InterfaceInfo implements Serializable
      * 创建人
      */
     private Long userId;
+
+    /**
+     * 预期响应结果
+     * */
+    private String responsePayload;
 
     /**
      * 创建时间

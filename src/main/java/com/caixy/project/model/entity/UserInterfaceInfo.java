@@ -4,17 +4,21 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+
 import java.io.Serializable;
 import java.util.Date;
+
 import lombok.Data;
 
 /**
  * 用户调用接口关系
+ *
  * @TableName user_interface_info
  */
-@TableName(value ="user_interface_info")
+@TableName(value = "user_interface_info")
 @Data
-public class UserInterfaceInfo implements Serializable {
+public class UserInterfaceInfo implements Serializable
+{
     /**
      * 主键
      */

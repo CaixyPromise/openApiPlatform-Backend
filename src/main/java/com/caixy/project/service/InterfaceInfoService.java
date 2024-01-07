@@ -1,6 +1,7 @@
 package com.caixy.project.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.caixy.project.model.dto.interfaceinfo.InterfaceInfoAddRequest;
 import com.caixy.project.model.dto.interfaceinfo.InterfaceInfoOffLineRequest;
 import com.caixy.project.model.dto.interfaceinfo.InterfaceInfoOnLineRequest;
 import com.caixy.project.common.BaseResponse;
@@ -18,7 +19,7 @@ import java.util.Set;
  */
 public interface InterfaceInfoService extends IService<InterfaceInfo>
 {
-    void validInterfaceInfo(InterfaceInfo interfaceInfo, boolean add);
+    void validInterfaceInfo(InterfaceInfoAddRequest interfaceInfo);
 
     BaseResponse<?> InterfaceOnline(InterfaceInfoOnLineRequest info, HttpServletRequest request);
 

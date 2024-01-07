@@ -2,12 +2,10 @@ package com.caixy.project.utils;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import lombok.AllArgsConstructor;
-import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.lang.reflect.Type;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -23,11 +21,19 @@ public class JsonUtils
 
     public static HashMap<String, Object> jsonToMap(String json)
     {
-        Type mapType = new TypeToken<HashMap<String, String>>() {}.getType();
+        Type mapType = new TypeToken<HashMap<String, String>>()
+        {
+        }.getType();
         return gson.fromJson(json, mapType);
     }
 
-
+    /**
+     * map转json
+     *
+     * @author CAIXYPROMISE
+     * @version a
+     * @since 2024/16 15:52
+     */
     public static String mapToString(Map<?, ?> map)
     {
         return gson.toJson(map);
@@ -37,4 +43,18 @@ public class JsonUtils
     {
         return gson.toJson(object);
     }
+
+    /**
+     * 将 JSON 字符串转换为对象列表
+     *
+     * @param json    JSON 字符串
+     * @param typeOfT 对象列表的类型
+     * @param <T>     对象类型
+     * @return 对象列表
+     */
+    public static <T> List<T> jsonToList(String json, Type typeOfT)
+    {
+        return gson.fromJson(json, typeOfT);
+    }
+
 }

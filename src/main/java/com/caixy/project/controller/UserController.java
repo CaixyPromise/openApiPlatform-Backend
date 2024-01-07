@@ -220,10 +220,6 @@ public class UserController
                 curUser, name));
     }
 
-
-
-
-
     /**
      * 根据 id 获取用户
      *

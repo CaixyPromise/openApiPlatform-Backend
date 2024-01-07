@@ -19,6 +19,7 @@ spring:
     port: 6379
     host: 192.168.59.226
     database: 0
+
 server:
   port: 7529
   servlet:
@@ -46,3 +47,10 @@ dubbo:
   registry:
     id: nacos-registry
     address: nacos://localhost:8848
+
+redis-session:
+  instance:
+    limiter:
+      database: 1
+      host: 192.168.59.226
+      port: 6379

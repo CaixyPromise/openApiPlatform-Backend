@@ -152,7 +152,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户不存在或密码错误");
         }
         // 3. 记录用户的登录态
-
         UserVO userVo = new UserVO();
         BeanUtils.copyProperties(user, userVo);
         request.getSession().setAttribute(UserConstant.USER_LOGIN_STATE, userVo);

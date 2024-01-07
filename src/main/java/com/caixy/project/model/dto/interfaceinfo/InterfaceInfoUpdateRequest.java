@@ -55,6 +55,11 @@ public class InterfaceInfoUpdateRequest implements Serializable {
      */
     private String method;
 
+    /**
+     * 预期响应结果
+     * */
+    private String responsePayload;
+
 
     private static final long serialVersionUID = 1L;
 }
