@@ -24,13 +24,12 @@ public class RedisLimiterManager
 {
     private final RedissonClient redissonClient;
 
-    private final RedisonManager redisonManager;
-
     public RedisLimiterManager(RedisonManager redisonManager)
     {
-        this.redisonManager = redisonManager;
+        ThrowUtils.throwIf(redisonManager == null, ErrorCode.SYSTEM_ERROR, "RedissonClient init fail.");
         // 加载redis限流器客户端
-        redissonClient = this.redisonManager.getRedissonClient("limiter");
+        redissonClient = redisonManager.getRedissonClient("limiter");
+        log.info("RedisLimiterManager init.");
     }
 
     /**

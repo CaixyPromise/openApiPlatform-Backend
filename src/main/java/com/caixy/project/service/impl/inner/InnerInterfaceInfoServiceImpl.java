@@ -8,6 +8,7 @@ import com.caixy.project.mapper.InterfaceInfoMapper;
 import com.caixy.project.mapper.InterfaceInvokeInfoMapper;
 import com.caixy.project.model.entity.InterfaceInfo;
 import com.caixy.project.model.entity.InterfaceInvokeInfo;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.dubbo.config.annotation.DubboService;
 
@@ -21,6 +22,7 @@ import javax.annotation.Resource;
  * @since: 2023-12-19 21:28
  **/
 @DubboService
+@Slf4j
 public class InnerInterfaceInfoServiceImpl implements InnerInterfaceInfoService
 {
     @Resource
@@ -34,7 +36,7 @@ public class InnerInterfaceInfoServiceImpl implements InnerInterfaceInfoService
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         QueryWrapper<InterfaceInfo> queryWrapper = new QueryWrapper<>();
-        System.out.println("path: " + path + " method: " + method);
+        log.info("path: {}, method: {}", path, method);
         queryWrapper.eq("url", path);
         queryWrapper.eq("method", method);
         InterfaceInfo result = interfaceInfoMapper.selectOne(queryWrapper);
