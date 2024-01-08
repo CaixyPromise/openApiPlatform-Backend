@@ -1,12 +1,12 @@
-package com.caixy.project.service.impl;
+package com.caixy.backend.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.caixy.project.common.ErrorCode;
-import com.caixy.project.exception.BusinessException;
-import com.caixy.project.mapper.UserMapper;
-import com.caixy.project.model.entity.User;
-import com.caixy.project.service.UserService;
+import com.caixy.backend.common.ErrorCode;
+import com.caixy.backend.exception.BusinessException;
+import com.caixy.backend.mapper.UserMapper;
+import com.caixy.backend.model.entity.User;
+import com.caixy.backend.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -15,8 +15,8 @@ import org.springframework.util.DigestUtils;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
-import static com.caixy.project.constant.UserConstant.ADMIN_ROLE;
-import static com.caixy.project.constant.UserConstant.USER_LOGIN_STATE;
+import static com.caixy.backend.constant.UserConstant.ADMIN_ROLE;
+import static com.caixy.backend.constant.UserConstant.USER_LOGIN_STATE;
 
 
 /**

@@ -1,7 +1,7 @@
-package com.caixy.project.controller;
+package com.caixy.backend.controller;
 
-import com.caixy.project.common.BaseResponse;
-import com.caixy.project.common.ResultUtils;
+import com.caixy.backend.common.BaseResponse;
+import com.caixy.backend.common.ResultUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

@@ -1,4 +1,4 @@
-package com.caixy.project.annotation;
+package com.caixy.backend.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

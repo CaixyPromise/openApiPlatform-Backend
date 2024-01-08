@@ -1,8 +1,8 @@
-package com.caixy.project.service;
+package com.caixy.backend.service;
 
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.caixy.project.model.entity.User;
+import com.caixy.backend.model.entity.User;
 
 import javax.servlet.http.HttpServletRequest;
 

@@ -1,4 +1,4 @@
-package com.caixy.project.model.dto.user;
+package com.caixy.backend.model.dto.user;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Data;

@@ -1,11 +1,11 @@
-package com.caixy.project.aop;
+package com.caixy.backend.aop;
 
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
-import com.caixy.project.annotation.AuthCheck;
-import com.caixy.project.common.ErrorCode;
-import com.caixy.project.exception.BusinessException;
-import com.caixy.project.model.entity.User;
-import com.caixy.project.service.UserService;
+import com.caixy.backend.annotation.AuthCheck;
+import com.caixy.backend.common.ErrorCode;
+import com.caixy.backend.exception.BusinessException;
+import com.caixy.backend.model.entity.User;
+import com.caixy.backend.service.UserService;
 import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;

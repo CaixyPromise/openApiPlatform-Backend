@@ -1,7 +1,7 @@
-package com.caixy.project.interceptor;
+package com.caixy.backend.interceptor;
 
-import com.caixy.project.common.ErrorCode;
-import com.caixy.project.exception.BusinessException;
+import com.caixy.backend.common.ErrorCode;
+import com.caixy.backend.exception.BusinessException;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

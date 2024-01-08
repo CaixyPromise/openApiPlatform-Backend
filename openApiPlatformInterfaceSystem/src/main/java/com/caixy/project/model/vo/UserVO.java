@@ -1,4 +1,4 @@
-package com.caixy.project.model.vo;
+package com.caixy.backend.model.vo;
 
 import lombok.Data;
 

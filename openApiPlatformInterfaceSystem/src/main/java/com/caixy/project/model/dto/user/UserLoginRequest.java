@@ -1,4 +1,4 @@
-package com.caixy.project.model.dto.user;
+package com.caixy.backend.model.dto.user;
 
 import lombok.Data;
 

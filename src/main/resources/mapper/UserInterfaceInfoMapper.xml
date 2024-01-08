@@ -4,7 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.caixy.project.mapper.UserInterfaceInfoMapper">
 
-    <resultMap id="BaseResultMap" type="com.caixy.project.model.entity.UserInterfaceInfo">
+    <resultMap id="BaseResultMap" type="com.caixy.backend.model.entity.UserInterfaceInfo">
             <id property="id" column="id" jdbcType="BIGINT"/>
             <result property="userId" column="userId" jdbcType="BIGINT"/>
             <result property="interfaceInfoId" column="interfaceInfoId" jdbcType="BIGINT"/>
@@ -21,7 +21,7 @@
         totalNum,leftNum,status,
         createTime,updateTime,isDelete
     </sql>
-    <select id="listTopInvokeInterfaceInfo" resultType="com.caixy.project.model.entity.UserInterfaceInfo">
+    <select id="listTopInvokeInterfaceInfo" resultType="com.caixy.backend.model.entity.UserInterfaceInfo">
         SELECT interfaceInfoId, sum(totalNum)
             AS totalNum
             FROM user_interface_info

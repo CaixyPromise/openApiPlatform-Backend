@@ -1,8 +1,8 @@
-package com.caixy.project.exception;
+package com.caixy.backend.exception;
 
-import com.caixy.project.common.BaseResponse;
-import com.caixy.project.common.ErrorCode;
-import com.caixy.project.common.ResultUtils;
+import com.caixy.backend.common.BaseResponse;
+import com.caixy.backend.common.ErrorCode;
+import com.caixy.backend.common.ResultUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;

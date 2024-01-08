@@ -4,7 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.caixy.project.mapper.PostMapper">
 
-    <resultMap id="BaseResultMap" type="com.caixy.project.model.entity.Post">
+    <resultMap id="BaseResultMap" type="com.caixy.backend.model.entity.Post">
             <id property="id" column="id" jdbcType="BIGINT"/>
             <result property="age" column="age" jdbcType="INTEGER"/>
             <result property="gender" column="gender" jdbcType="TINYINT"/>

@@ -1,17 +1,17 @@
-package com.caixy.project.controller;
+package com.caixy.backend.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
-import com.caixy.project.common.BaseResponse;
-import com.caixy.project.common.DeleteRequest;
-import com.caixy.project.common.ErrorCode;
-import com.caixy.project.common.ResultUtils;
-import com.caixy.project.exception.BusinessException;
-import com.caixy.project.model.dto.user.*;
-import com.caixy.project.model.entity.User;
-import com.caixy.project.model.vo.UserVO;
-import com.caixy.project.service.UserService;
+import com.caixy.backend.common.BaseResponse;
+import com.caixy.backend.common.DeleteRequest;
+import com.caixy.backend.common.ErrorCode;
+import com.caixy.backend.common.ResultUtils;
+import com.caixy.backend.exception.BusinessException;
+import com.caixy.backend.model.dto.user.*;
+import com.caixy.backend.model.entity.User;
+import com.caixy.backend.model.vo.UserVO;
+import com.caixy.backend.service.UserService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;

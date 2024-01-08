@@ -1,6 +1,6 @@
-package com.caixy.project.service;
+package com.caixy.backend.service;
 
-import com.caixy.project.model.entity.User;
+import com.caixy.backend.model.entity.User;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
