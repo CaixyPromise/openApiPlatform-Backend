@@ -7,6 +7,7 @@ import com.caixy.backend.model.entity.User;
 import com.caixy.backend.model.vo.UserVO;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
 
 /**
  * 用户服务
@@ -58,5 +59,10 @@ public interface UserService extends IService<User> {
      */
     boolean userLogout(HttpServletRequest request);
 
-    boolean updateUserInfo(Long id, String columnName, String newValue);
+    boolean updateUserInfo(Long id, HashMap<String, Object>newDict);
+
+    User verifyUserPassword(String userAccount, String userPassword);
+
+    // 校验账号密码是否符合规范
+    void validateAccountAndPassword(String userAccount, String userPassword, String checkPassword);
 }

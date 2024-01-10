@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
 import java.util.Map;
 
 
@@ -85,7 +86,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             String encryptPassword = encryptionUtils.encodePassword(userPassword);
             // 3. 分配accessKey和secretKey
             String accessKey = encryptionUtils.makeUserKey(userAccount);
-            String secretKey = encryptionUtils.makeUserKey(userPassword);
+            String secretKey = encryptionUtils.makeUserKey(userAccount + "." + SALT);
             // 4. 插入数据
             User user = new User();
             user.setUserAccount(userAccount);
@@ -135,21 +136,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         }
 
         // 2. 加密
-
-        // 查询用户是否存在
-        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("userAccount", userAccount);
-        User user = userMapper.selectOne(queryWrapper);
-        // 用户不存在
+        // 验证用户账号密码
+        User user = verifyUserPassword(userAccount, userPassword);
         if (user == null)
         {
-            log.info("user login failed, userAccount cannot match userPassword");
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户不存在或密码错误");
-        }
-        if (!encryptionUtils.matches(userPassword, user.getUserPassword()))
-        {
-            log.info("user login failed, userAccount cannot match userPassword");
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户不存在或密码错误");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "账号或密码错误");
         }
         // 3. 记录用户的登录态
         UserVO userVo = new UserVO();
@@ -211,15 +202,77 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     }
 
     @Override
-    public boolean updateUserInfo(Long id, String columnName, String newValue)
+    public boolean updateUserInfo(Long id, HashMap<String, Object> newDict)
     {
         UpdateWrapper<User> userUpdateWrapper = new UpdateWrapper<>();
         userUpdateWrapper.eq("id", id);
         // 直接更新columnName字段， 放入newValue
-        userUpdateWrapper.set(columnName, newValue);
+        // 提取HashMap的Key和Value放进userUpdateWrapper里
+        newDict.forEach(userUpdateWrapper::set);
         return userMapper.update(null, userUpdateWrapper) > 0;
     }
 
+    /**
+     * 验证账号密码是否正确
+     * @param userAccount 用户账号
+     * @param userPassword 用户密码
+     *
+     * @author CAIXYPROMISE
+     * @version 1.0
+     * @since 2024/1/10 2:23
+     */
+    @Override
+    public User verifyUserPassword(String userAccount, String userPassword)
+    {
+        // 查询用户是否存在
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("userAccount", userAccount);
+        User user = userMapper.selectOne(queryWrapper);
+        // 用户不存在
+        if (user == null)
+        {
+            log.info("user login failed, userAccount cannot match userPassword");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户不存在或密码错误");
+        }
+        if (!encryptionUtils.matches(userPassword, user.getUserPassword()))
+        {
+            log.info("user login failed, userAccount cannot match userPassword");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户不存在或密码错误");
+        }
+        return user;
+    }
+
+    /**
+     * 校验账号密码是否符合规范
+     *
+     * @param userPassword  用户第壹次输入的密码
+     * @param checkPassword 用户第贰次输入的密码
+     * @param userAccount   用户账号
+     * @author CAIXYPROMISE
+     * @version 1.0
+     * @since 2024/110 22:24
+     */
+    @Override
+    public void validateAccountAndPassword(String userAccount, String userPassword, String checkPassword)
+    {
+        if (StringUtils.isAnyBlank(userAccount, userPassword, checkPassword))
+        {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
+        }
+        if (userAccount.length() < 4)
+        {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户账号过短");
+        }
+        if (userPassword.length() < 8 || checkPassword.length() < 8)
+        {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户密码过短");
+        }
+        // 密码和校验密码相同
+        if (!userPassword.equals(checkPassword))
+        {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "两次输入的密码不一致");
+        }
+    }
 }
 
 

@@ -2,7 +2,7 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.caixy.project.mapper.InterfaceInvokeInfoMapper">
+<mapper namespace="com.caixy.backend.mapper.InterfaceInvokeInfoMapper">
 
     <resultMap id="BaseResultMap" type="com.caixy.backend.model.entity.InterfaceInvokeInfo">
             <id property="id" column="id" jdbcType="BIGINT"/>

@@ -32,3 +32,4 @@ build/
 ### VS Code ###
 .vscode/
 nacos/
+src/main/resources/application-dev.yml
