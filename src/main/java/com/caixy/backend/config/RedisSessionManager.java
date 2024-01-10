@@ -1,25 +1,25 @@
-package com.caixy.backend.manager;
+package com.caixy.backend.config;
 
 import com.caixy.backend.common.ErrorCode;
-import com.caixy.backend.config.RedissonProperties;
 import com.caixy.backend.exception.ThrowUtils;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 
 /**
  * RedisSession会话管理，用来配置分布式redis配置，根据要求客户端类型加载对应的客户端
- * @name: com.caixy.project.manager.RedisonManager
+ *
+ * @name: com.caixy.project.manager.RedisSessionManager
  * @author: CAIXYPROMISE
  * @since: 2024-01-07 22:01
  **/
-@Configuration
+@Service
 @EnableConfigurationProperties(RedissonProperties.class)
-public class RedisonManager
+public class RedisSessionManager
 {
     @Resource
     private RedissonProperties redissonProperties;

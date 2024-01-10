@@ -1,6 +1,7 @@
 package com.caixy.backend.manager;
 
 import com.caixy.backend.common.ErrorCode;
+import com.caixy.backend.config.RedisSessionManager;
 import com.caixy.backend.exception.ThrowUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RRateLimiter;
@@ -22,11 +23,11 @@ public class RedisLimiterManager
 {
     private final RedissonClient redissonClient;
 
-    public RedisLimiterManager(RedisonManager redisonManager)
+    public RedisLimiterManager(RedisSessionManager redisSessionManager)
     {
-        ThrowUtils.throwIf(redisonManager == null, ErrorCode.SYSTEM_ERROR, "RedissonClient init fail.");
+        ThrowUtils.throwIf(redisSessionManager == null, ErrorCode.SYSTEM_ERROR, "RedissonClient init fail.");
         // 加载redis限流器客户端
-        redissonClient = redisonManager.getRedissonClient("limiter");
+        redissonClient = redisSessionManager.getRedissonClient("limiter");
         log.info("RedisLimiterManager init.");
     }
 
