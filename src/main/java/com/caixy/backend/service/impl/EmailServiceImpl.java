@@ -4,6 +4,7 @@ import com.caixy.backend.config.EmailConfig;
 import com.caixy.backend.constant.EmailConstant;
 import com.caixy.backend.service.EmailService;
 import com.caixy.backend.utils.EmailUtils;
+import com.caixy.backend.utils.RedisOperatorService;
 import com.sun.xml.internal.messaging.saaj.packaging.mime.MessagingException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -25,11 +26,14 @@ public class EmailServiceImpl implements EmailService
     @Resource
     private EmailConfig emailConfig;
 
+    @Resource
+    private RedisOperatorService redisOperatorService;
+
     /**
      * 发送邮箱验证码
      *
      * @param targetEmailAccount 邮箱账号
-     * @param captcha      验证码
+     * @param captcha            验证码
      * @author CAIXYPROMISE
      * @version 1.0
      * @since 2024/1/10 2:04
@@ -37,6 +41,8 @@ public class EmailServiceImpl implements EmailService
     @Override
     public void sendCaptchaEmail(String targetEmailAccount, String captcha)
     {
+        // 将验证码存入Redis内
+        // 发送邮件逻辑
         SimpleMailMessage message = new SimpleMailMessage();
         // 邮箱发送内容组成
         message.setSubject(EmailConstant.EMAIL_SUBJECT);
@@ -51,8 +57,8 @@ public class EmailServiceImpl implements EmailService
      * 发送支付成功信息
      *
      * @param targetEmailAccount 邮箱账号
-     * @param orderName    订单名称
-     * @param orderTotal   订单金额
+     * @param orderName          订单名称
+     * @param orderTotal         订单金额
      * @author CAIXYPROMISE
      * @version 1.0
      * @since 2024/1/10 2:04

@@ -3,7 +3,6 @@ package com.caixy.backend.model.vo;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.Date;
 
 /**
  * 用户视图
@@ -11,7 +10,8 @@ import java.util.Date;
  * @TableName user
  */
 @Data
-public class UserVO implements Serializable {
+public class UserVO implements Serializable
+{
     /**
      * id
      */
@@ -38,29 +38,14 @@ public class UserVO implements Serializable {
     private Integer gender;
 
     /**
+     * 邮箱
+     */
+    private String email;
+
+    /**
      * 用户角色: user, admin
      */
     private String userRole;
-
-    /**
-     * 创建时间
-     */
-    private Date createTime;
-
-    /**
-     * accessKey
-     */
-    private String accessKey;
-
-    /**
-     * secretKey
-     */
-    private String secretKey;
-
-    /**
-     * 更新时间
-     */
-    private Date updateTime;
 
     private static final long serialVersionUID = 1L;
 }

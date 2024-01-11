@@ -32,9 +32,9 @@ public class RedisOperatorService
      * @version 1.0
      * @since 2023/12/0 20:19
      */
-    public boolean delete(String key)
+    public Boolean delete(String key)
     {
-        return Boolean.TRUE.equals(stringRedisTemplate.delete(key));
+        return stringRedisTemplate.delete(key);
     }
 
     /**
@@ -74,9 +74,22 @@ public class RedisOperatorService
     }
 
     /**
+     * 获取Key是否存在
+     * @param key 判断key
+     * @author CAIXYPROMISE
+     * @version 1.0
+     * @since 2024/1/1 18:09
+     */
+    public Boolean isExistKey(String key)
+    {
+        return stringRedisTemplate.hasKey(key);
+    }
+
+    /**
      * 放入hash类型的数据 - Hash<String, Object>
-     * @param key redis-key
-     * @param data 数据
+     *
+     * @param key    redis-key
+     * @param data   数据
      * @param expire 过期时间, 单位: 秒
      * @author CAIXYPROMISE
      * @version 1.0
@@ -135,9 +148,8 @@ public class RedisOperatorService
     }
 
 
-
-
     // ===================================== 分布式锁 =====================================
+
     /**
      * 尝试获取分布式锁
      *

@@ -273,6 +273,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "两次输入的密码不一致");
         }
     }
+
+    /**
+     * 判断邮箱是否存在
+     * @author CAIXYPROMISE
+     * @since 2024/1/11 16:57
+     * @version 1.0
+     */
+    @Override
+    public boolean isEmailExist(String email)
+    {
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("email", email);
+        return this.count(queryWrapper) > 0;
+    }
 }
 
 

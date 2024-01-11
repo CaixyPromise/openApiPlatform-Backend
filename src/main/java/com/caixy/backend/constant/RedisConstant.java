@@ -68,10 +68,10 @@ public interface RedisConstant
     // 调用接口排名信息的最大容量
     Long REDIS_INVOKE_RANK_MAX_SIZE = 10L;
 
-    String REDIS_INVOKE_INFO_KEY = "INFO:INVOKE_INFO";
+    String REDIS_INVOKE_INFO_KEY = "INFO:INVOKE_INFO:";
 
     // 排名信息的Key
     String REDIS_RANK_KEY = "REDIS_KEY_RANK:";
     // 调用接口排名信息的Key
-    String REDIS_INVOKE_RANK_KEY = REDIS_RANK_KEY + "INVOKE";
+    String REDIS_INVOKE_RANK_KEY = REDIS_RANK_KEY + "INVOKE:";
 }

@@ -1,6 +1,7 @@
 package com.caixy.backend.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.caixy.backend.annotation.AuthCheck;
@@ -8,15 +9,18 @@ import com.caixy.backend.common.BaseResponse;
 import com.caixy.backend.common.DeleteRequest;
 import com.caixy.backend.common.ErrorCode;
 import com.caixy.backend.common.ResultUtils;
+import com.caixy.backend.constant.EmailConstant;
 import com.caixy.backend.constant.RedisConstant;
 import com.caixy.backend.constant.UserConstant;
 import com.caixy.backend.exception.BusinessException;
+import com.caixy.backend.exception.ThrowUtils;
 import com.caixy.backend.mapper.UserMapper;
 import com.caixy.backend.model.dto.user.*;
 import com.caixy.backend.model.entity.User;
 import com.caixy.backend.model.vo.SignatureVO;
 import com.caixy.backend.model.vo.UpdateKeyVO;
 import com.caixy.backend.model.vo.UserVO;
+import com.caixy.backend.service.EmailService;
 import com.caixy.backend.service.UserService;
 import com.caixy.backend.utils.EncryptionUtils;
 import com.caixy.backend.utils.RedisOperatorService;
@@ -27,8 +31,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,6 +63,9 @@ public class UserController
 
     @Resource
     private RedisOperatorService redisOperatorService;
+
+    @Resource
+    private EmailService emailService;
 
     // region 登录相关
 
@@ -218,7 +225,6 @@ public class UserController
     }
 
 
-
     /**
      * 根据 id 获取用户
      *
@@ -298,6 +304,7 @@ public class UserController
     // endregion
 
     // region 用户密钥操作
+
     /**
      * 更新用户密钥的方法
      *
@@ -308,13 +315,13 @@ public class UserController
 
     @GetMapping("/update_key")
     public BaseResponse<UpdateKeyVO> updateKey(@RequestParam String token,
-                                               @RequestParam String name, HttpServletRequest request)
+                                               @RequestParam String name,
+                                               HttpServletRequest request)
     {
-        if (token == null || name == null)
-        {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
-        }
-        UserVO curUser = getCurrentUser(request);
+        // 校验请求合法性
+        ThrowUtils.throwIf(token == null || name == null, ErrorCode.PARAMS_ERROR, "参数为空");
+        // 需要为登录状态
+        UserVO curUser = userService.getLoginUser(request);
         HashMap<String, Object> updateInfo = new HashMap<>();
         Map<String, Consumer<UserVO>> actions = getStringConsumerMap(updateInfo);
 
@@ -327,12 +334,11 @@ public class UserController
         {
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "更新失败");
         }
+
         // 获取本次更新的内容, 把新更新的值返回
         UpdateKeyVO updateKeyVO = new UpdateKeyVO();
-
-        updateKeyVO.setAccessKey(curUser.getAccessKey());
-        updateKeyVO.setSecretKey(curUser.getSecretKey());
-
+        updateKeyVO.setAccessKey(actions.get("accessKey").toString());
+        updateKeyVO.setSecretKey(actions.get("secretKey").toString());
         return ResultUtils.success(updateKeyVO);
     }
 
@@ -348,6 +354,7 @@ public class UserController
         });
         return actions;
     }
+
     /**
      * 修改用户的accessKey和secretKey信息的签名认证
      * 只有管理员和自己能够调用
@@ -360,7 +367,7 @@ public class UserController
     public BaseResponse<SignatureVO> getModifyLicense(@RequestBody UserGetLicenseRequest user, HttpServletRequest request)
     {
         // 1. 获取用户信息
-        UserVO currentUser = getCurrentUser(request);
+        UserVO currentUser = userService.getLoginUser(request);
         // 2. 查询用户
         User userQuery = userMapper.selectById(currentUser.getId());
         // 3. 校验用户权限，只有用户自己和管理员才能调用
@@ -406,7 +413,7 @@ public class UserController
         userService.validateAccountAndPassword(userAccount, userNewPassword, checkPassword);
         // 更新账号密码
         QueryWrapper
-            <User> queryWrapper = new QueryWrapper<>();
+                <User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("userAccount", userAccount);
         User user = userMapper.selectOne(queryWrapper);
         // 密码加密
@@ -416,18 +423,49 @@ public class UserController
         return ResultUtils.success(true);
     }
 
+    /**
+     * 修改邮箱
+     * 此处是发起校验用户修改邮箱是否合法，发送验证码给之前的邮箱
+     *
+     * @author CAIXYPROMISE
+     * @version 1.0
+     * @since 2024/1/10 22:33
+     */
+    @PostMapping("/modify/email")
+    public boolean modifyUserEmail(@Valid @RequestBody ModifyUserEmailRequest modifyUserEmailRequest,
+                                   HttpServletRequest request)
+    {
+
+        if (modifyUserEmailRequest == null)
+        {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
+        }
+        // 获取当前用户
+        UserVO curUser = userService.getLoginUser(request);
+        // 检查签名是否存在且合规
+        Map<Object, Object> redisInfo = redisOperatorService.getHash(EmailConstant.EMAIL_NEW_CAPTCHA_CACHE_KEY, modifyUserEmailRequest.getSignature());
+        if (redisInfo == null)
+        {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "邮箱不存在或请求已过期");
+        }
+        // 检查验证码是否正确
+        // key: 邮箱 -> {
+        //     签名 -> 验证码
+        // }
+        String signCode = (String) redisInfo.get(modifyUserEmailRequest.getSignature());
+        if (signCode == null || !signCode.equals(modifyUserEmailRequest.getCode()))
+        {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "验证码不存在或已过期");
+        }
+        // 更新邮箱
+        UpdateWrapper<User> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("id", curUser.getId());
+        updateWrapper.set("email", modifyUserEmailRequest.getEmail());
+        return userService.update(updateWrapper);
+    }
 
     // endregion
 
-    private UserVO getCurrentUser(HttpServletRequest request)
-    {
-        UserVO currentUser = userService.getLoginUser(request);
-        if (currentUser == null)
-        {
-            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
-        }
-        return currentUser;
-    }
 
     private boolean updateUserInfo(String token, UserVO curUser, HashMap<String, Object> updateInfo)
     {
@@ -437,11 +475,9 @@ public class UserController
         {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "token失效");
         }
-        // 校验完就删掉
-        // 防止重复提交
+        // 校验完就删掉token, 防止重复提交
         redisOperatorService.delete(RedisConstant.SIGNATURE_CODE_KEY + token);
 
         return userService.updateUserInfo(curUser.getId(), updateInfo);
     }
-
 }

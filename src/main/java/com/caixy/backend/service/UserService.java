@@ -65,4 +65,6 @@ public interface UserService extends IService<User> {
 
     // 校验账号密码是否符合规范
     void validateAccountAndPassword(String userAccount, String userPassword, String checkPassword);
+
+    boolean isEmailExist(String email);
 }

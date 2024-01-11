@@ -21,9 +21,14 @@ public interface EmailConstant
     String EMAIL_HTML_PAY_SUCCESS_PATH = "pay.html";
 
     /**
-     * captcha缓存键
+     * 修改邮箱请求captcha缓存键 校验之前的邮箱
      */
-    String EMAIL_CAPTCHA_CACHE_KEY = "api:captcha:";
+    String EMAIL_CAPTCHA_CACHE_KEY = "API:CAPTCHA_BEFORE:";
+    /**
+     * 修改邮箱请求captcha缓存有效时间
+     */
+    Long EMAIL_CAPTCHA_CACHE_TTL = (5L * 60L);
+    String EMAIL_NEW_CAPTCHA_CACHE_KEY = "API:CAPTCHA_AFTER:";
 
     /**
      * 电子邮件主题
@@ -33,23 +38,23 @@ public interface EmailConstant
     /**
      * 电子邮件标题
      */
-    String EMAIL_TITLE = "Qi-API 接口开放平台";
+    String EMAIL_TITLE = "PROMISE-API 接口开放平台";
 
     /**
      * 电子邮件标题英语
      */
-    String EMAIL_TITLE_ENGLISH = "Qi-API Open Interface Platform";
+    String EMAIL_TITLE_ENGLISH = "PROMISE-API Open Interface Platform";
 
     /**
      * 平台负责人
      */
-    String PLATFORM_RESPONSIBLE_PERSON = "柒木工作室";
+    String PLATFORM_RESPONSIBLE_PERSON = "CAIXYPROMISE";
 
     /**
      * 平台地址
      */
-    String PLATFORM_ADDRESS = "<a href='https://api.qimuu.icu/'>请联系我们</a>";
+    String PLATFORM_ADDRESS = "<a href='https://api.PROMISE.icu/'>请联系我们</a>";
 
-    String PATH_ADDRESS = "'https://api.qimuu.icu/'";
+    String PATH_ADDRESS = "'https://api.PROMISE.icu/'";
 
 }
