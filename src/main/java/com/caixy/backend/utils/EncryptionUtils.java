@@ -17,6 +17,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class EncryptionUtils
@@ -45,7 +46,9 @@ public class EncryptionUtils
                 .append(".")
                 .append(System.currentTimeMillis())
                 .append(".")
-                .append(Arrays.toString(RandomUtil.randomInts(5)));
+                .append(UUID.randomUUID().toString())
+                .append(".")
+                .append(Arrays.toString(RandomUtil.randomBytes(10)));
         return md5.digestHex(stringBuffer.toString());
     }
 

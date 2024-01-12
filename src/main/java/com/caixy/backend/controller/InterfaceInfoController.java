@@ -12,6 +12,7 @@ import com.caixy.backend.common.ResultUtils;
 import com.caixy.backend.constant.CommonConstant;
 import com.caixy.backend.exception.BusinessException;
 import com.caixy.backend.model.entity.InterfaceInfo;
+import com.caixy.backend.model.entity.User;
 import com.caixy.backend.model.vo.UserVO;
 import com.caixy.backend.service.InterfaceInfoService;
 import com.caixy.backend.service.UserService;
@@ -279,8 +280,12 @@ public class InterfaceInfoController
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "接口已关闭或不存在");
         }
         log.info("UserName is: {}", currentUser);
+        // 获取用户信息
+        User userInfo = userService.getById(currentUser.getId());
         // 4. 模拟请求
-        OpenApiClient apiClient = new OpenApiClient(currentUser.getAccessKey(), currentUser.getSecretKey());
+        String accessKey = userInfo.getAccessKey();
+        String secretKey = userInfo.getSecretKey();
+        OpenApiClient apiClient = new OpenApiClient(accessKey, secretKey);
         log.info("apiClient userInfo is: {}", currentUser);
 
         try {

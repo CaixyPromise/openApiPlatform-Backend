@@ -17,6 +17,7 @@ import com.caixy.backend.exception.ThrowUtils;
 import com.caixy.backend.mapper.UserMapper;
 import com.caixy.backend.model.dto.user.*;
 import com.caixy.backend.model.entity.User;
+import com.caixy.backend.model.vo.GetVoucherVO;
 import com.caixy.backend.model.vo.SignatureVO;
 import com.caixy.backend.model.vo.UpdateKeyVO;
 import com.caixy.backend.model.vo.UserVO;
@@ -306,53 +307,71 @@ public class UserController
     // region 用户密钥操作
 
     /**
+     * 获取key
+     *
+     * @author CAIXYPROMISE
+     * @version
+     * @since 2024/1/11 21:06
+     */
+    @PostMapping("/get_key")
+    public BaseResponse<GetVoucherVO> getVoucherKey(@Valid @RequestBody UserGetLicenseRequest getLicenseRequest,
+                                                    HttpServletRequest request)
+    {
+        // 获取登录信息
+        UserVO userVO = userService.getLoginUser(request);
+        // 验证密码
+        User userInfo = userService.verifyUserPassword(userVO.getUserAccount(), getLicenseRequest.getPassword());
+        // 检查时间戳是否超过五分钟
+        if (System.currentTimeMillis() - Long.parseLong(getLicenseRequest.getTimestamp()) > 5 * 60 * 1000)
+        {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "操作失败");
+        }
+        // 检查随机数是否被使用?
+        if (redisOperatorService.hasKey(RedisConstant.LICENSE_NONCE_KEY + getLicenseRequest.getNonce()))
+        {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "操作失败");
+        }
+        // 存入随机数+时间戳
+        redisOperatorService.setString(RedisConstant.LICENSE_NONCE_KEY + getLicenseRequest.getNonce(),
+                getLicenseRequest.getTimestamp().toString(),
+                RedisConstant.NONCE_EXPIRE);
+        GetVoucherVO voucherVO = new GetVoucherVO();
+        voucherVO.setAccessKey(userInfo.getAccessKey());
+        voucherVO.setSecretKey(userInfo.getSecretKey());
+        return ResultUtils.success(voucherVO);
+    }
+
+
+    /**
      * 更新用户密钥的方法
      *
      * @author CAIXYPROMISE
      * @version 1.0
      * @since 2024/1/10 11:47
      */
-
     @GetMapping("/update_key")
-    public BaseResponse<UpdateKeyVO> updateKey(@RequestParam String token,
-                                               @RequestParam String name,
+    public BaseResponse<UpdateKeyVO> updateKey(
                                                HttpServletRequest request)
     {
-        // 校验请求合法性
-        ThrowUtils.throwIf(token == null || name == null, ErrorCode.PARAMS_ERROR, "参数为空");
         // 需要为登录状态
         UserVO curUser = userService.getLoginUser(request);
+        User userQuery = userMapper.selectById(curUser.getId());
+        // 3. 校验用户权限，只有用户自己和管理员才能调用
+        if (!userQuery.getId().equals(curUser.getId()) &&
+                !curUser.getUserRole().equals(UserConstant.DEFAULT_ROLE))
+        {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
+        // 4. 获取用户信息，并更新密钥
         HashMap<String, Object> updateInfo = new HashMap<>();
-        Map<String, Consumer<UserVO>> actions = getStringConsumerMap(updateInfo);
-
-        if (actions.containsKey(name))
-        {
-            actions.get(name).accept(curUser);
-        }
-        // 更新失败
-        if (!updateUserInfo(token, curUser, updateInfo))
-        {
-            throw new BusinessException(ErrorCode.OPERATION_ERROR, "更新失败");
-        }
-
+        updateInfo.put("accessKey", encryptionUtils.makeUserKey(userQuery.getUserName()));
+        updateInfo.put("secretKey", encryptionUtils.makeUserKey(userQuery.getUserName() + "." + SALT));
+        userService.updateUserInfo(curUser.getId(), updateInfo);
         // 获取本次更新的内容, 把新更新的值返回
         UpdateKeyVO updateKeyVO = new UpdateKeyVO();
-        updateKeyVO.setAccessKey(actions.get("accessKey").toString());
-        updateKeyVO.setSecretKey(actions.get("secretKey").toString());
+        updateKeyVO.setAccessKey(updateInfo.get("accessKey").toString());
+        updateKeyVO.setSecretKey(updateInfo.get("secretKey").toString());
         return ResultUtils.success(updateKeyVO);
-    }
-
-    private Map<String, Consumer<UserVO>> getStringConsumerMap(HashMap<String, Object> updateInfo)
-    {
-        Map<String, Consumer<UserVO>> actions = new HashMap<>();
-        actions.put("accessKey", user -> updateInfo.put("accessKey", encryptionUtils.makeUserKey(user.getUserName())));
-        actions.put("secretKey", user -> updateInfo.put("secretKey", encryptionUtils.makeUserKey(user.getUserName() + "." + SALT)));
-        actions.put("all", user ->
-        {
-            updateInfo.put("accessKey", encryptionUtils.makeUserKey(user.getUserName()));
-            updateInfo.put("secretKey", encryptionUtils.makeUserKey(user.getUserName() + "." + SALT));
-        });
-        return actions;
     }
 
     /**
@@ -432,7 +451,7 @@ public class UserController
      * @since 2024/1/10 22:33
      */
     @PostMapping("/modify/email")
-    public boolean modifyUserEmail(@Valid @RequestBody ModifyUserEmailRequest modifyUserEmailRequest,
+    public BaseResponse<Boolean> modifyUserEmail(@Valid @RequestBody ModifyUserEmailRequest modifyUserEmailRequest,
                                    HttpServletRequest request)
     {
 
@@ -443,7 +462,8 @@ public class UserController
         // 获取当前用户
         UserVO curUser = userService.getLoginUser(request);
         // 检查签名是否存在且合规
-        Map<Object, Object> redisInfo = redisOperatorService.getHash(EmailConstant.EMAIL_NEW_CAPTCHA_CACHE_KEY, modifyUserEmailRequest.getSignature());
+        String redisKey = EmailConstant.EMAIL_NEW_CAPTCHA_CACHE_KEY + modifyUserEmailRequest.getEmail();
+        Map<Object, Object> redisInfo = redisOperatorService.getHash(redisKey);
         if (redisInfo == null)
         {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "邮箱不存在或请求已过期");
@@ -461,23 +481,13 @@ public class UserController
         UpdateWrapper<User> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("id", curUser.getId());
         updateWrapper.set("email", modifyUserEmailRequest.getEmail());
-        return userService.update(updateWrapper);
-    }
-
-    // endregion
-
-
-    private boolean updateUserInfo(String token, UserVO curUser, HashMap<String, Object> updateInfo)
-    {
-        // 校验token
-        // redis校验token
-        if (redisOperatorService.getString(RedisConstant.SIGNATURE_CODE_KEY + token) == null)
+        if (userService.update(updateWrapper))
         {
-            throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "token失效");
+            // 删除key
+            redisOperatorService.delete(redisKey);
+            return ResultUtils.success(true);
         }
-        // 校验完就删掉token, 防止重复提交
-        redisOperatorService.delete(RedisConstant.SIGNATURE_CODE_KEY + token);
-
-        return userService.updateUserInfo(curUser.getId(), updateInfo);
+        return ResultUtils.success(false);
     }
+    // endregion
 }

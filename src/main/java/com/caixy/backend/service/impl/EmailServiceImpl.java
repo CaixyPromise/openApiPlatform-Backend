@@ -1,15 +1,21 @@
 package com.caixy.backend.service.impl;
 
+import com.caixy.backend.common.ErrorCode;
 import com.caixy.backend.config.EmailConfig;
 import com.caixy.backend.constant.EmailConstant;
+import com.caixy.backend.exception.BusinessException;
 import com.caixy.backend.service.EmailService;
 import com.caixy.backend.utils.EmailUtils;
 import com.caixy.backend.utils.RedisOperatorService;
-import com.sun.xml.internal.messaging.saaj.packaging.mime.MessagingException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
 
 /**
  * 邮箱服务类实现
@@ -18,6 +24,8 @@ import javax.annotation.Resource;
  * @author: CAIXYPROMISE
  * @since: 2024-01-10 22:01
  **/
+@Service
+@Slf4j
 public class EmailServiceImpl implements EmailService
 {
     @Resource
@@ -26,8 +34,6 @@ public class EmailServiceImpl implements EmailService
     @Resource
     private EmailConfig emailConfig;
 
-    @Resource
-    private RedisOperatorService redisOperatorService;
 
     /**
      * 发送邮箱验证码
@@ -41,16 +47,23 @@ public class EmailServiceImpl implements EmailService
     @Override
     public void sendCaptchaEmail(String targetEmailAccount, String captcha)
     {
-        // 将验证码存入Redis内
-        // 发送邮件逻辑
-        SimpleMailMessage message = new SimpleMailMessage();
-        // 邮箱发送内容组成
-        message.setSubject(EmailConstant.EMAIL_SUBJECT);
-        message.setText(EmailUtils.buildCaptchaEmailContent(EmailConstant.EMAIL_HTML_CONTENT_PATH, captcha));
-        message.setTo(targetEmailAccount);
-        message.setFrom(EmailConstant.EMAIL_TITLE + '<' + emailConfig.getUsername() + '>');
-        mailSender.send(message);
-
+        try{
+            // 将验证码存入Redis内
+            // 发送邮件逻辑
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message);
+//        SimpleMailMessage message = new SimpleMailMessage();
+            // 邮箱发送内容组成
+            helper.setSubject(EmailConstant.EMAIL_SUBJECT);
+            helper.setText(EmailUtils.buildCaptchaEmailContent(EmailConstant.EMAIL_HTML_CONTENT_PATH, captcha), true);
+            helper.setTo(targetEmailAccount);
+            helper.setFrom(EmailConstant.EMAIL_TITLE + '<' + emailConfig.getUsername() + '>');
+            mailSender.send(helper.getMimeMessage());
+        }
+        catch (MessagingException e)
+        {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "验证码发送失败");
+        }
     }
 
     /**

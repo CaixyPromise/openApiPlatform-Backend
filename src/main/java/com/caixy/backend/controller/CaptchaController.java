@@ -50,8 +50,8 @@ public class CaptchaController
     @Resource
     private RedisOperatorService redisOperatorService;
 
-    @Resource
-    private EncryptionUtils encryptionUtils;
+    private final static String SIGN = "captchaID";
+
 
     /**
      * 生成验证码
@@ -62,8 +62,14 @@ public class CaptchaController
         HashMap<String, String> resultMap = new HashMap<>();
         // 保存验证码信息
         // 生成uuid
-        String uuid = UUID.randomUUID().toString();
+        Object lastUuid = request.getSession().getAttribute(SIGN);
 
+        if (lastUuid != null)
+        {
+            redisOperatorService.delete(RedisConstant.CAPTCHA_CODE_KEY + lastUuid.toString());
+        }
+
+        String uuid = UUID.randomUUID().toString();
         String capStr = null, code = null;
         BufferedImage image = null;
 
@@ -113,6 +119,7 @@ public class CaptchaController
         CaptchaVO captchaVO = new CaptchaVO();
         captchaVO.setCodeImage(Base64.encode(os.toByteArray()));
         captchaVO.setUuid(uuid);
+        request.getSession().setAttribute(SIGN, uuid);
         return ResultUtils.success(captchaVO);
     }
 }

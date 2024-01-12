@@ -1,6 +1,8 @@
 spring:
+  profiles:
+    active: prod
   application:
-    name: openApiPlatformBackend
+    name: openApiPlatformBackend-dev
   # DataSource Config
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -19,6 +21,23 @@ spring:
     port: 6379
     host: 192.168.59.226
     database: 0
+  mail:
+    host: smtp.163.com
+    username: your_email@163.com
+    password: your_emailPassword
+    defaultEncoding: UTF-8
+    port: 465
+    protocol: smtp
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          ssl:
+            enable: true
+          stattls:
+            require: true
 
 server:
   port: 7529
@@ -38,6 +57,7 @@ encryption:
   key: CAIXYRPOMISE
 
 
+
 dubbo:
   application:
     name: dubbo-springboot-demo-provider
@@ -54,3 +74,7 @@ redis-session:
       database: 1
       host: 192.168.59.226
       port: 6379
+
+logging:
+  level:
+    org.springframework.boot: DEBUG

@@ -7,6 +7,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 
+import java.util.Properties;
+
 /**
  * 邮箱配置
  *
@@ -22,11 +24,30 @@ public class EmailConfig
     private String host;
     private Integer port;
     private String username;
+    private String password;
     private String defaultEncoding;
-
+    private Properties properties;
     @Bean
     public JavaMailSender javaMailSender()
     {
-        return new JavaMailSenderImpl();
+        JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+        mailSender.setHost(host);
+        mailSender.setPort(port);
+        mailSender.setUsername(username);
+        mailSender.setPassword(password);
+        mailSender.setDefaultEncoding(defaultEncoding);
+
+        // 这里假设您的配置文件中包含了 spring.mail.properties 下的额外配置
+        if (properties != null) {
+            mailSender.setJavaMailProperties(asProperties(properties));
+        }
+
+        return mailSender;
+    }
+    // 将 Map 转换为 Properties
+    private Properties asProperties(Properties map) {
+        Properties props = new Properties();
+        props.putAll(map);
+        return props;
     }
 }

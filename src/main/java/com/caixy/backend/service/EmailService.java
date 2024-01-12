@@ -1,5 +1,7 @@
 package com.caixy.backend.service;
 
+import javax.mail.MessagingException;
+
 /**
  * @Name: com.caixy.backend.service.EmailService
  * @Description: 邮箱服务类

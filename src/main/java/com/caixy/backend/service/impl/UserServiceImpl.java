@@ -1,17 +1,18 @@
 package com.caixy.backend.service.impl;
+
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.caixy.backend.common.ErrorCode;
 import com.caixy.backend.constant.RedisConstant;
 import com.caixy.backend.constant.UserConstant;
 import com.caixy.backend.exception.BusinessException;
-import com.caixy.backend.model.dto.user.UserLoginRequest;
-import com.caixy.backend.model.vo.UserVO;
-import com.caixy.backend.utils.EncryptionUtils;
-import com.caixy.backend.common.ErrorCode;
 import com.caixy.backend.mapper.UserMapper;
+import com.caixy.backend.model.dto.user.UserLoginRequest;
 import com.caixy.backend.model.entity.User;
+import com.caixy.backend.model.vo.UserVO;
 import com.caixy.backend.service.UserService;
+import com.caixy.backend.utils.EncryptionUtils;
 import com.caixy.backend.utils.RedisOperatorService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -121,7 +122,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "账号错误");
         }
         // 1.2 校验验证码
-        Map<Object, Object> result = redisOperatorService.getHash(RedisConstant.CAPTCHA_CODE_KEY, captchaId);
+        Map<Object, Object> result = redisOperatorService.getHash(RedisConstant.CAPTCHA_CODE_KEY + captchaId);
         if (result == null || result.isEmpty())
         {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "验证码错误");
@@ -214,9 +215,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
     /**
      * 验证账号密码是否正确
-     * @param userAccount 用户账号
-     * @param userPassword 用户密码
      *
+     * @param userAccount  用户账号
+     * @param userPassword 用户密码
+     * @return 用户信息
      * @author CAIXYPROMISE
      * @version 1.0
      * @since 2024/1/10 2:23
@@ -276,9 +278,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
     /**
      * 判断邮箱是否存在
+     *
      * @author CAIXYPROMISE
-     * @since 2024/1/11 16:57
      * @version 1.0
+     * @since 2024/1/11 16:57
      */
     @Override
     public boolean isEmailExist(String email)

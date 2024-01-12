@@ -13,7 +13,7 @@ public interface EmailConstant
     /**
      * 电子邮件html内容路径 resources目录下
      */
-    String EMAIL_HTML_CONTENT_PATH = "email.html";
+    String EMAIL_HTML_CONTENT_PATH = "captcha.html";
 
     /**
      * 电子邮件html支付成功路径
@@ -25,7 +25,7 @@ public interface EmailConstant
      */
     String EMAIL_CAPTCHA_CACHE_KEY = "API:CAPTCHA_BEFORE:";
     /**
-     * 修改邮箱请求captcha缓存有效时间
+     * 修改邮箱请求captcha缓存有效时间 5 minute
      */
     Long EMAIL_CAPTCHA_CACHE_TTL = (5L * 60L);
     String EMAIL_NEW_CAPTCHA_CACHE_KEY = "API:CAPTCHA_AFTER:";

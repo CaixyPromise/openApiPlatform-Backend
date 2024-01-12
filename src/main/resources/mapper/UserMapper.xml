@@ -18,6 +18,8 @@
             <result property="updateTime" column="updateTime" jdbcType="TIMESTAMP"/>
             <result property="isDelete" column="isDelete" jdbcType="TINYINT"/>
             <result property="email" column="email" jdbcType="VARCHAR"/>
+            <result property="balance" column="balance" jdbcType="BIGINT"/>
+            <result property="invitationCode" column="invitationCode" jdbcType="CHAR"/>
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -25,6 +27,6 @@
         userAvatar,gender,userRole,
         userPassword,accessKey,secretKey,
         createTime,updateTime,isDelete,
-        email
+        email,balance,invitationCode
     </sql>
 </mapper>

@@ -68,21 +68,9 @@ public class RedisOperatorService
      * @version 1.0
      * @since 2023/1220 20:18
      */
-    public Map<Object, Object> getHash(String key, String objectName)
+    public Map<Object, Object> getHash(String key)
     {
-        return stringRedisTemplate.opsForHash().entries(key + objectName);
-    }
-
-    /**
-     * 获取Key是否存在
-     * @param key 判断key
-     * @author CAIXYPROMISE
-     * @version 1.0
-     * @since 2024/1/1 18:09
-     */
-    public Boolean isExistKey(String key)
-    {
-        return stringRedisTemplate.hasKey(key);
+        return stringRedisTemplate.opsForHash().entries(key);
     }
 
     /**

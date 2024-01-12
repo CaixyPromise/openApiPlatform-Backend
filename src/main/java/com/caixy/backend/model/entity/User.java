@@ -78,6 +78,16 @@ public class User implements Serializable {
      */
     private Integer isDelete;
 
+    /**
+     * 余额
+     */
+    private Long balance;
+
+    /**
+     * 邀请码
+     */
+    private String invitationCode;
+
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
 }
