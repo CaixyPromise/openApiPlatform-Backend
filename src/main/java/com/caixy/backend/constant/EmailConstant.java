@@ -30,6 +30,7 @@ public interface EmailConstant
     Long EMAIL_CAPTCHA_CACHE_TTL = (5L * 60L);
     String EMAIL_NEW_CAPTCHA_CACHE_KEY = "API:CAPTCHA_AFTER:";
 
+    String EMAIL_MODIFY_PASSWORD_CACHE_KEY = "USER:MODIFY_PASSWORD:";
     /**
      * 电子邮件主题
      */

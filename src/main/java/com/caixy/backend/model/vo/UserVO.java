@@ -43,6 +43,11 @@ public class UserVO implements Serializable
     private String email;
 
     /**
+     * 余额
+     * */
+    private Long balance;
+
+    /**
      * 用户角色: user, admin
      */
     private String userRole;

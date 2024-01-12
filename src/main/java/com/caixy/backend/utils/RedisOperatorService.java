@@ -1,16 +1,17 @@
 package com.caixy.backend.utils;
 
+import com.caixy.backend.common.ErrorCode;
 import com.caixy.backend.constant.RedisConstant;
+import com.caixy.backend.exception.BusinessException;
 import lombok.AllArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 /**
  * Redis缓存操作类
@@ -25,6 +26,14 @@ public class RedisOperatorService
 {
     private final StringRedisTemplate stringRedisTemplate;
 
+    private final static String releaseDistributionLockScript =
+            "if redis.call('get', KEYS[1]) == ARGV[1] then " +
+                    "    return redis.call('del', KEYS[1]) " +
+                    "else " +
+                    "    return 0 " +
+                    "end";
+
+    // region 常见redis操作
     /**
      * 删除Key的数据
      *
@@ -135,8 +144,8 @@ public class RedisOperatorService
         return Boolean.TRUE.equals(stringRedisTemplate.hasKey(key));
     }
 
-
-    // ===================================== 分布式锁 =====================================
+    // endregion
+    // region 分布式锁
 
     /**
      * 尝试获取分布式锁
@@ -159,12 +168,53 @@ public class RedisOperatorService
             try
             {
                 Thread.sleep(RedisConstant.RETRY_INTERVAL);
-            } catch (InterruptedException e)
+            }
+            catch (InterruptedException e)
             {
                 Thread.currentThread().interrupt();
             }
         }
         return false;
+    }
+    /**
+     * 尝试获取分布式锁
+     *
+     * @param lockKey    锁的Key
+     * @param requestId  请求标识
+     * @param expireTime 过期时间
+     * @param onSuccess   获取成功后的回调函数
+     * @return 是否获取成功
+     */
+    public <T> T tryGetDistributedLock(String lockKey, String requestId, Long expireTime, Supplier<T> onSuccess)
+    {
+        for (int i = 0; i < RedisConstant.MAX_RETRY_TIMES; i++)
+        {
+            Boolean result = stringRedisTemplate.opsForValue().setIfAbsent(lockKey, requestId, expireTime, TimeUnit.SECONDS);
+            if (result != null && result)
+            {
+                try
+                {
+                    return onSuccess.get(); // 执行传入的函数并返回结果
+                }
+                catch (Exception e)
+                {
+                    // 异常处理
+                    throw new BusinessException(ErrorCode.OPERATION_ERROR, "获取分布式锁失败");
+                } finally
+                {
+                    // 无论执行成功还是发生异常，都释放锁
+                    releaseDistributedLock(lockKey, requestId);
+                }
+            }
+            try
+            {
+                Thread.sleep(RedisConstant.RETRY_INTERVAL);
+            } catch (InterruptedException e)
+            {
+                Thread.currentThread().interrupt();
+            }
+        }
+        throw new BusinessException(ErrorCode.OPERATION_ERROR, "获取分布式锁失败");
     }
 
     /**
@@ -176,13 +226,28 @@ public class RedisOperatorService
      */
     public boolean releaseDistributedLock(String lockKey, String requestId)
     {
-        if (requestId.equals(stringRedisTemplate.opsForValue().get(lockKey)))
+        try
         {
-            return delete(lockKey);
-        }
-        return false;
-    }
+            // 执行Lua脚本 释放锁
+            Object result = stringRedisTemplate.execute(
+                    new DefaultRedisScript<>(releaseDistributionLockScript, Long.class),
+                    Collections.singletonList(lockKey),
+                    requestId
+            );
 
+            // 检查结果
+            return Long.valueOf(1).equals(result);
+        } catch (Exception e)
+        {
+            // 异常处理
+            // 这里可以记录日志或进行其他异常处理
+            e.printStackTrace();
+            return false;
+        }
+    }
+    // endregion
+
+    // region 排行榜相关方法
     // ===================== 排行榜实现 =====================
 
     /**
@@ -356,4 +421,5 @@ public class RedisOperatorService
         return stringRedisTemplate.opsForZSet().reverseRangeByScoreWithScores(key, start, end);
     }
 
+    // endregion
 }

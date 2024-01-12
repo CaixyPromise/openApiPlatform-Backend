@@ -13,7 +13,9 @@ import com.caixy.backend.model.dto.interfaceinfo.InterfaceInfoOffLineRequest;
 import com.caixy.backend.model.dto.interfaceinfo.InterfaceInfoOnLineRequest;
 import com.caixy.backend.model.entity.InterfaceInfo;
 import com.caixy.backend.model.entity.User;
+import com.caixy.backend.model.vo.UserVO;
 import com.caixy.backend.service.InterfaceInfoService;
+import com.caixy.backend.utils.RegexUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -66,7 +68,6 @@ public class InterfaceInfoServiceImpl extends ServiceImpl<InterfaceInfoMapper, I
     @Override
     public void validInterfaceInfo(InterfaceInfoAddRequest interfaceInfo)
     {
-        log.info("interfaceInfo: {}", interfaceInfo);
         // 名称校验
         ThrowUtils.throwIf(interfaceInfo.getName() == null || interfaceInfo.getName().isEmpty(),
                 ErrorCode.PARAMS_ERROR, "接口名称不能为空");
@@ -74,7 +75,7 @@ public class InterfaceInfoServiceImpl extends ServiceImpl<InterfaceInfoMapper, I
         ThrowUtils.throwIf(interfaceInfo.getUrl() == null || interfaceInfo.getUrl().isEmpty(),
                 ErrorCode.PARAMS_ERROR, "接口地址不能为空");
         // 正则表达式匹配URL
-        ThrowUtils.throwIf(!isValidUrl(interfaceInfo.getUrl()),
+        ThrowUtils.throwIf(!RegexUtils.isURL(interfaceInfo.getUrl()),
                 ErrorCode.PARAMS_ERROR, "无效的URL格式");
 
         // 请求方法校验
@@ -102,7 +103,7 @@ public class InterfaceInfoServiceImpl extends ServiceImpl<InterfaceInfoMapper, I
     public BaseResponse<?> InterfaceOnline(InterfaceInfoOnLineRequest info, HttpServletRequest request)
     {
         // 1. 获取当前用户
-        User currentUser = (User) request.getSession().getAttribute(USER_LOGIN_STATE);
+        UserVO currentUser = (UserVO) request.getSession().getAttribute(USER_LOGIN_STATE);
         if (currentUser == null)
         {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
@@ -149,7 +150,7 @@ public class InterfaceInfoServiceImpl extends ServiceImpl<InterfaceInfoMapper, I
     public BaseResponse<?> InterfaceOffline(InterfaceInfoOffLineRequest info, HttpServletRequest request)
     {
         // 1. 获取当前用户
-        User currentUser = (User) request.getSession().getAttribute(USER_LOGIN_STATE);
+        UserVO currentUser = (UserVO) request.getSession().getAttribute(USER_LOGIN_STATE);
         if (currentUser == null)
         {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
@@ -196,13 +197,6 @@ public class InterfaceInfoServiceImpl extends ServiceImpl<InterfaceInfoMapper, I
     }
 
 
-    private boolean isValidUrl(String url)
-    {
-        String urlRegex = "^(http[s]?://)?([\\w.-]+(?:\\.[\\w.-]+)+|localhost)?[\\w\\-\\._~:/?#\\[\\]@!$&'()*+,;=]*$";
-        return url.matches(urlRegex);
-    }
-
-
     private void validatePayload(List<?> payload, String payloadType)
     {
         if (payload != null)
@@ -216,11 +210,7 @@ public class InterfaceInfoServiceImpl extends ServiceImpl<InterfaceInfoMapper, I
                 }
             });
         }
-//        if (payload != null && !payload.isEmpty())
-//        {
-//            ThrowUtils.throwIf(Character.isDigit(payload.charAt(0)),
-//                    ErrorCode.PARAMS_ERROR, payloadType + "不能以数字开头");
-//        }
+
     }
 }
 

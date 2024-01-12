@@ -17,7 +17,20 @@ public interface RedisConstant
      * */
     Long NONCE_EXPIRE = (60L * 5L);
 
+    /**
+     * 获取凭证的随机数key
+     * */
     String LICENSE_NONCE_KEY = NONCE_KEY + "license:";
+    /**
+     * 修改密码随机数key
+     * */
+    String MODIFY_PASSWORD_NONCE_KEY = NONCE_KEY + "modify_password:";
+    /**
+     * 修改密码随机数key过期时间
+     * */
+    Long MODIFY_PASSWORD_NONCE_EXPIRE = (60L * 5L);
+
+
 
     /**
      * 验证码缓存key

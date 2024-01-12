@@ -21,10 +21,10 @@ import com.caixy.backend.model.vo.GetVoucherVO;
 import com.caixy.backend.model.vo.SignatureVO;
 import com.caixy.backend.model.vo.UpdateKeyVO;
 import com.caixy.backend.model.vo.UserVO;
-import com.caixy.backend.service.EmailService;
 import com.caixy.backend.service.UserService;
 import com.caixy.backend.utils.EncryptionUtils;
 import com.caixy.backend.utils.RedisOperatorService;
+import com.caixy.backend.utils.RegexUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -38,7 +38,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 
@@ -61,12 +60,8 @@ public class UserController
     private UserMapper userMapper;
     @Resource
     private EncryptionUtils encryptionUtils;
-
     @Resource
     private RedisOperatorService redisOperatorService;
-
-    @Resource
-    private EmailService emailService;
 
     // region 登录相关
 
@@ -333,7 +328,7 @@ public class UserController
         }
         // 存入随机数+时间戳
         redisOperatorService.setString(RedisConstant.LICENSE_NONCE_KEY + getLicenseRequest.getNonce(),
-                getLicenseRequest.getTimestamp().toString(),
+                getLicenseRequest.getTimestamp(),
                 RedisConstant.NONCE_EXPIRE);
         GetVoucherVO voucherVO = new GetVoucherVO();
         voucherVO.setAccessKey(userInfo.getAccessKey());
@@ -351,7 +346,7 @@ public class UserController
      */
     @GetMapping("/update_key")
     public BaseResponse<UpdateKeyVO> updateKey(
-                                               HttpServletRequest request)
+            HttpServletRequest request)
     {
         // 需要为登录状态
         UserVO curUser = userService.getLoginUser(request);
@@ -412,33 +407,46 @@ public class UserController
 
     // region 修改用户密保：修改密码/设置邮箱/解绑
     @PostMapping("/modify/password")
-    public BaseResponse<Boolean> modifyPassword(@RequestBody ModifyPasswordRequest modifyPasswordRequest)
+    public BaseResponse<Boolean> modifyPassword(@RequestBody ModifyPasswordRequest modifyPasswordRequest,
+                                                HttpServletRequest request)
     {
         if (modifyPasswordRequest == null)
         {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        String userAccount = modifyPasswordRequest.getUserAccount();
+        log.info("received request: {}",modifyPasswordRequest.toString());
+        // 1. 参数校验
         String userOldPassword = modifyPasswordRequest.getOldPassword();
         String checkPassword = modifyPasswordRequest.getNewPassword();
         String userNewPassword = modifyPasswordRequest.getNewPassword();
-        if (StringUtils.isAnyBlank(userAccount, userOldPassword, userNewPassword, checkPassword))
-        {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
-        }
-        // 判断原密码是否正确
+        String signature = modifyPasswordRequest.getSignature();
+        ThrowUtils.throwIf(StringUtils.isAnyBlank(signature, userOldPassword, checkPassword, userNewPassword),
+                ErrorCode.PARAMS_ERROR, "参数为空");
+        ThrowUtils.throwIf(!checkPassword.equals(userNewPassword), ErrorCode.PARAMS_ERROR, "两次输入的密码不一致");
+        // 2. 获取当前登录的用户信息，并且需要登录
+        UserVO requestVO = userService.getLoginUser(request);
+        // 3. 获取数据库内的用户信息
+        User dbUser = userMapper.selectById(requestVO.getId());
+        // 4. 检查是否绑定邮箱
+        ThrowUtils.throwIf(dbUser.getEmail() == null, ErrorCode.SYSTEM_ERROR, "用户未绑定邮箱, 请先绑定再操作");
+        String userAccount = dbUser.getUserAccount();
+        // 5. 判断原密码是否正确,
         userService.verifyUserPassword(userAccount, userOldPassword);
-        // 判断新密码是否符合规范
+        // 5.1 判断原密码和新密码是否一致
+        ThrowUtils.throwIf(encryptionUtils.matches(userNewPassword, dbUser.getUserPassword()), ErrorCode.OPERATION_ERROR, "原密码不能与新密码相同");
+        // 6. 判断新密码是否符合规范
         userService.validateAccountAndPassword(userAccount, userNewPassword, checkPassword);
+        ThrowUtils.throwIf(!RegexUtils.validateUsernameAndPassword(userAccount, userNewPassword), ErrorCode.OPERATION_ERROR, "密码不符合规范");
+        // 7. 检查验证码是否正确
+        String redisKey = EmailConstant.EMAIL_MODIFY_PASSWORD_CACHE_KEY + dbUser.getEmail();
+        validateEmailRedisKey(redisKey, modifyPasswordRequest.getEmailCode(), modifyPasswordRequest.getSignature());
         // 更新账号密码
-        QueryWrapper
-                <User> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("userAccount", userAccount);
-        User user = userMapper.selectOne(queryWrapper);
         // 密码加密
         String encryptPassword = encryptionUtils.encodePassword(userNewPassword);
-        user.setUserPassword(encryptPassword);
-        userMapper.updateById(user);
+        dbUser.setUserPassword(encryptPassword);
+        userMapper.updateById(dbUser);
+        // 更改密码后要重新登录
+        userService.userLogout(request);
         return ResultUtils.success(true);
     }
 
@@ -452,7 +460,7 @@ public class UserController
      */
     @PostMapping("/modify/email")
     public BaseResponse<Boolean> modifyUserEmail(@Valid @RequestBody ModifyUserEmailRequest modifyUserEmailRequest,
-                                   HttpServletRequest request)
+                                                 HttpServletRequest request)
     {
 
         if (modifyUserEmailRequest == null)
@@ -463,20 +471,7 @@ public class UserController
         UserVO curUser = userService.getLoginUser(request);
         // 检查签名是否存在且合规
         String redisKey = EmailConstant.EMAIL_NEW_CAPTCHA_CACHE_KEY + modifyUserEmailRequest.getEmail();
-        Map<Object, Object> redisInfo = redisOperatorService.getHash(redisKey);
-        if (redisInfo == null)
-        {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "邮箱不存在或请求已过期");
-        }
-        // 检查验证码是否正确
-        // key: 邮箱 -> {
-        //     签名 -> 验证码
-        // }
-        String signCode = (String) redisInfo.get(modifyUserEmailRequest.getSignature());
-        if (signCode == null || !signCode.equals(modifyUserEmailRequest.getCode()))
-        {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "验证码不存在或已过期");
-        }
+        validateEmailRedisKey(redisKey, modifyUserEmailRequest.getCode(), modifyUserEmailRequest.getSignature());
         // 更新邮箱
         UpdateWrapper<User> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("id", curUser.getId());
@@ -488,6 +483,34 @@ public class UserController
             return ResultUtils.success(true);
         }
         return ResultUtils.success(false);
+    }
+
+    /**
+     * 验证redis里的邮箱验证码是否正确
+     *
+     * @param redisKey redis的操作key
+     * @param code     用户输入的验证码
+     * @param sign     redis里存储的验证码
+     * @author CAIXYPROMISE
+     * @version a
+     * @since 2024/1/2 18:58
+     */
+    private void validateEmailRedisKey(String redisKey, String code, String sign)
+    {
+        Map<Object, Object> redisInfo = redisOperatorService.getHash(redisKey);
+        if (redisInfo == null)
+        {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "邮箱不存在或请求已过期");
+        }
+        // 检查验证码是否正确
+        // key: 邮箱 -> {
+        //     签名 -> 验证码
+        // }
+        String signCode = (String) redisInfo.get(sign);
+        if (signCode == null || !signCode.equals(code))
+        {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "验证码不存在或已过期");
+        }
     }
     // endregion
 }

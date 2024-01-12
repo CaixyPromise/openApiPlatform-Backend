@@ -136,7 +136,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "验证码错误");
         }
 
-        // 2. 加密
         // 验证用户账号密码
         User user = verifyUserPassword(userAccount, userPassword);
         if (user == null)
@@ -146,6 +145,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         // 3. 记录用户的登录态
         UserVO userVo = new UserVO();
         BeanUtils.copyProperties(user, userVo);
+        log.info("登录用户:{}", userVo);
         request.getSession().setAttribute(UserConstant.USER_LOGIN_STATE, userVo);
         // 登录成功
         return userVo;

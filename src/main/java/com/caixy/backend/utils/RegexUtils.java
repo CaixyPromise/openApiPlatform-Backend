@@ -37,6 +37,24 @@ public class RegexUtils
         return isMatch(RegexConstants.phoneRegex, phone);
     }
 
+    public static boolean isURL(String url)
+    {
+        return isMatch(RegexConstants.urlRegex, url);
+    }
+
+    /**
+     * 校验密码合法性
+     *
+     * @author CAIXYPROMISE
+     * @version 1.0
+     * @since 2024/1/2 18:09
+     */
+    public static boolean validateUsernameAndPassword(String userName, String password)
+    {
+        return isMatch(RegexConstants.passwordRegex, password) &&
+                isMatch(RegexConstants.accountRegex, userName);
+    }
+
     // region 匹配内置方法函数
     // 是否匹配
     private static boolean isMatch(String regex, String str)
