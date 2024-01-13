@@ -192,8 +192,9 @@ public class EmailController
     /**
      * 生成并发送验证码
      * 存入redis内容: key: redis分类键+邮箱 {
-     *     签名: 验证码
+     * 签名: 验证码
      * }
+     *
      * @author CAIXYPROMISE
      * @version a
      * @since 2024/112 18:51
@@ -205,6 +206,7 @@ public class EmailController
         HashMap<String, String> emailCodeMap = new HashMap<>();
         emailCodeMap.put(signCode, captcha);
         redisOperatorService.setStringHashMap(redisKey + email, emailCodeMap, EmailConstant.EMAIL_CAPTCHA_CACHE_TTL);
+        // 放入线程池发送邮件->
         emailService.sendCaptchaEmail(email, captcha);
         return ResultUtils.success(signCode);
     }
