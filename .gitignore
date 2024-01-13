@@ -34,3 +34,4 @@ build/
 nacos/
 src/main/resources/application-dev.yml
 derby.log
+logs/
