@@ -33,3 +33,4 @@ build/
 .vscode/
 nacos/
 src/main/resources/application-dev.yml
+derby.log

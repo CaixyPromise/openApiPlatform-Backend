@@ -6,9 +6,7 @@ import com.caixy.backend.constant.EmailConstant;
 import com.caixy.backend.exception.BusinessException;
 import com.caixy.backend.service.EmailService;
 import com.caixy.backend.utils.EmailUtils;
-import com.caixy.backend.utils.RedisOperatorService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -16,6 +14,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadPoolExecutor;
 
 /**
@@ -51,7 +50,8 @@ public class EmailServiceImpl implements EmailService
     @Override
     public void sendCaptchaEmail(String targetEmailAccount, String captcha)
     {
-        threadPoolExecutor.submit(() ->
+        // 提交异步任务, 不关心返回值
+        CompletableFuture.runAsync(() ->
         {
             try {
                 // 发送邮件逻辑
@@ -69,7 +69,7 @@ public class EmailServiceImpl implements EmailService
             {
                 throw new BusinessException(ErrorCode.OPERATION_ERROR, "验证码发送失败");
             }
-        });
+        }, threadPoolExecutor);
     }
 
     /**
@@ -85,7 +85,7 @@ public class EmailServiceImpl implements EmailService
     @Override
     public void sendPaymentSuccessEmail(String targetEmailAccount, String orderName, String orderTotal)
     {
-        threadPoolExecutor.submit(() ->
+        CompletableFuture.runAsync(() ->
         {
             try {
                 MimeMessage message = mailSender.createMimeMessage();
@@ -101,6 +101,6 @@ public class EmailServiceImpl implements EmailService
             {
                 throw new BusinessException(ErrorCode.OPERATION_ERROR, "邮件发送失败");
             }
-        });
+        }, threadPoolExecutor);
     }
 }
