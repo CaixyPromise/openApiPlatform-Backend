@@ -1,6 +1,7 @@
 package com.caixy.backend.config;
 
 import com.caixy.backend.common.ErrorCode;
+import com.caixy.backend.config.properties.RedissonProperties;
 import com.caixy.backend.exception.ThrowUtils;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
