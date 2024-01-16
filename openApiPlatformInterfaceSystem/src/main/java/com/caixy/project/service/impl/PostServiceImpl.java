@@ -1,13 +1,13 @@
-package com.caixy.backend.service.impl;
+package com.caixy.project.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.caixy.backend.common.ErrorCode;
-import com.caixy.backend.exception.BusinessException;
-import com.caixy.backend.mapper.PostMapper;
-import com.caixy.backend.model.entity.Post;
-import com.caixy.backend.model.enums.PostGenderEnum;
-import com.caixy.backend.model.enums.PostReviewStatusEnum;
-import com.caixy.backend.service.PostService;
+import com.caixy.project.common.ErrorCode;
+import com.caixy.project.exception.BusinessException;
+import com.caixy.project.mapper.PostMapper;
+import com.caixy.project.model.entity.Post;
+import com.caixy.project.model.enums.PostGenderEnum;
+import com.caixy.project.model.enums.PostReviewStatusEnum;
+import com.caixy.project.service.PostService;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;

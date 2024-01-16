@@ -1,4 +1,4 @@
-package com.caixy.backend.model.dto.post;
+package com.caixy.project.model.dto.post;
 
 import lombok.Data;
 

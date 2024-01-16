@@ -1,7 +1,7 @@
-package com.caixy.backend.service;
+package com.caixy.project.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.caixy.backend.model.entity.Post;
+import com.caixy.project.model.entity.Post;
 
 /**
  * @author caixyli

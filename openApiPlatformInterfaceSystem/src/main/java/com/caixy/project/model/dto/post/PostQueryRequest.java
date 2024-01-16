@@ -1,6 +1,6 @@
-package com.caixy.backend.model.dto.post;
+package com.caixy.project.model.dto.post;
 
-import com.caixy.backend.common.PageRequest;
+import com.caixy.project.common.PageRequest;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

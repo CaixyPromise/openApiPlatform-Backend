@@ -1,4 +1,4 @@
-package com.caixy.backend;
+package com.caixy.project;
 
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;

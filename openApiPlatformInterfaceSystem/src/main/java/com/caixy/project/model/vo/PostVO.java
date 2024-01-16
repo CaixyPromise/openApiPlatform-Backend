@@ -1,6 +1,6 @@
-package com.caixy.backend.model.vo;
+package com.caixy.project.model.vo;
 
-import com.caixy.backend.model.entity.Post;
+import com.caixy.project.model.entity.Post;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

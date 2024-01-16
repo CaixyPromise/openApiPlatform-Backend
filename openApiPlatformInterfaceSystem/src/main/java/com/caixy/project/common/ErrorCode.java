@@ -1,4 +1,4 @@
-package com.caixy.backend.common;
+package com.caixy.project.common;
 
 /**
  * 错误码

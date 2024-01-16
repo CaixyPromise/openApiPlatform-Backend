@@ -1,7 +1,7 @@
-package com.caixy.backend.mapper;
+package com.caixy.project.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.caixy.backend.model.entity.Post;
+import com.caixy.project.model.entity.Post;
 
 /**
 * @author caixyli

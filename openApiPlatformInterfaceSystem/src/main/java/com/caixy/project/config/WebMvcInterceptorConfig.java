@@ -1,6 +1,6 @@
-package com.caixy.backend.config;
+package com.caixy.project.config;
 
-import com.caixy.backend.interceptor.RequestInterceptors;
+import com.caixy.project.interceptor.RequestInterceptors;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;

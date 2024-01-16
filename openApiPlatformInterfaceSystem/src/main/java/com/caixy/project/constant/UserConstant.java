@@ -1,4 +1,4 @@
-package com.caixy.backend.constant;
+package com.caixy.project.constant;
 
 /**
  * 用户常量
