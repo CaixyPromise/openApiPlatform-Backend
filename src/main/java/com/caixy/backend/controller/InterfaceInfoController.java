@@ -291,7 +291,10 @@ public class InterfaceInfoController
         try {
             redisLimiterManager.doRateLimiter(String.valueOf(currentUser.getId()));
             HashMap<String, Object> payloadObject = JsonUtils.jsonToMap(interfaceInfoInvokeRequest.getUserRequestPayload());
+            log.info("original payloadObject is: {}", interfaceInfoInvokeRequest.getUserRequestPayload());
+            log.info("payloadObject is: {}", payloadObject);
             String result = apiClient.makeRequest(interfaceInfo.getUrl(), interfaceInfo.getMethod(), payloadObject);
+//            return ResultUtils.success("success");
             return ResultUtils.success(result);
         }
         catch (Exception e) {

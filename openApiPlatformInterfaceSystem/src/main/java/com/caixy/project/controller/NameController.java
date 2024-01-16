@@ -1,10 +1,10 @@
-package com.caixy.backend.controller;
+package com.caixy.project.controller;
 
-import com.caixy.backend.common.BaseResponse;
-import com.caixy.backend.common.ResultUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.caixy.project.common.BaseResponse;
+import com.caixy.project.common.ResultUtils;
+import com.caixy.project.model.dto.Name.TestRequestBody;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 测试接口控制器
@@ -15,11 +15,27 @@ import org.springframework.web.bind.annotation.RestController;
  **/
 @RestController
 @RequestMapping("/name")
+@Slf4j
 public class NameController
 {
     @GetMapping("/getName")
     public BaseResponse<String> getName()
     {
         return ResultUtils.success("caixy");
+    }
+
+    @GetMapping("/test")
+    public BaseResponse<String> test(@RequestParam String name,
+                                     @RequestParam Integer age)
+    {
+        return ResultUtils.success("requestBody is, name:" + name + ", age: " + age);
+    }
+
+    @PostMapping("/test/post")
+    public  BaseResponse<String> testPost(@RequestBody TestRequestBody requestBody)
+    {
+        String name = requestBody.getName();
+        Integer age = requestBody.getAge();
+        return ResultUtils.success("requestBody is, name:" + name + ", age: " + age);
     }
 }

@@ -1,6 +1,6 @@
-package com.caixy.backend.exception;
+package com.caixy.project.exception;
 
-import com.caixy.backend.common.ErrorCode;
+import com.caixy.project.common.ErrorCode;
 
 /**
  * 自定义异常类

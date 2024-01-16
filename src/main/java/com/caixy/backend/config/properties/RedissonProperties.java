@@ -1,4 +1,4 @@
-package com.caixy.backend.config;
+package com.caixy.backend.config.properties;
 
 import lombok.Data;
 import lombok.Getter;

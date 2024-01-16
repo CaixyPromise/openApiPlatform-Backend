@@ -1,6 +1,6 @@
-package com.caixy.backend.common;
+package com.caixy.project.common;
 
-import com.caixy.backend.constant.CommonConstant;
+import com.caixy.project.constant.CommonConstant;
 import lombok.Data;
 
 /**

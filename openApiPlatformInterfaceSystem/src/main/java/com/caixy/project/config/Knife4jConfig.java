@@ -1,4 +1,4 @@
-package com.caixy.backend.config;
+package com.caixy.project.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

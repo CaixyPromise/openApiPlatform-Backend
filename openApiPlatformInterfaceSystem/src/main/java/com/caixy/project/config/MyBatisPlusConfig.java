@@ -1,4 +1,4 @@
-package com.caixy.backend.config;
+package com.caixy.project.config;
 
 import com.baomidou.mybatisplus.annotation.DbType;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;

@@ -1,4 +1,4 @@
-package com.caixy.backend.model.entity;
+package com.caixy.project.model.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;

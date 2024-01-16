@@ -16,8 +16,8 @@ import java.util.concurrent.*;
 @Configuration
 public class ThreadPoolExecutorConfig
 {
-    private final int corePoolSize = 10;
-    private final int maximumPoolSize = 20;
+    private final int corePoolSize = 4;
+    private final int maximumPoolSize = 4;
     private final long keepAliveTime = 60;
     private final TimeUnit unit = TimeUnit.SECONDS;
     private final int queueCapacity = 50;

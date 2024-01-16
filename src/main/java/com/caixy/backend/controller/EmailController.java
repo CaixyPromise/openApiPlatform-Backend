@@ -87,7 +87,7 @@ public class EmailController
                 return handleVerifyNewEmail(dbUser, emailCaptchaRequest);
             case VERIFY_BIND_EMAIL: // 之前从未绑定邮箱
                 return handleBindEmail(dbUser, emailCaptchaRequest);
-            case VERIFY_MODIFY_PASSWORD:
+            case VERIFY_MODIFY_PASSWORD: // 修改密码的验证
                 return handleModifyPassword(dbUser, emailCaptchaRequest);
             default:
                 throw new BusinessException(ErrorCode.OPERATION_ERROR, "非法操作");
@@ -163,6 +163,13 @@ public class EmailController
     private BaseResponse<String> handleModifyPassword(User dbUser, ModifyEmailCaptchaRequest request)
     {
         ThrowUtils.throwIf(request.getEventType() != VERIFY_MODIFY_PASSWORD, ErrorCode.OPERATION_ERROR, "非法操作");
+        // 确保当前用户已绑定的邮箱
+        ThrowUtils.throwIf(dbUser.getEmail() == null || dbUser.getEmail().trim().isEmpty(), ErrorCode.PARAMS_ERROR, "未绑定邮箱，无法使用此功能");
+        // 校验密码
+        log.info("request info: {}", request);
+        String[] password = request.getNewEmail().split("\\|split\\|");
+        ThrowUtils.throwIf(password.length != 2, ErrorCode.PARAMS_ERROR, "格式错误");
+        userService.verifyUserPassword(dbUser.getUserAccount(), password[1]);
         // 校验随机数与时间戳
         String nonce = request.getCode();
         String timestamp = request.getSignature();

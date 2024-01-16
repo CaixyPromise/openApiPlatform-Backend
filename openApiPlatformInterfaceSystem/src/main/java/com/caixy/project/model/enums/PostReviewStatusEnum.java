@@ -1,4 +1,4 @@
-package com.caixy.backend.model.enums;
+package com.caixy.project.model.enums;
 
 import java.util.Arrays;
 import java.util.List;
