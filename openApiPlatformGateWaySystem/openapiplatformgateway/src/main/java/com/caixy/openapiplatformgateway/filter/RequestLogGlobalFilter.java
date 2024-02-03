@@ -11,7 +11,6 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.WebSession;
 import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
@@ -27,6 +26,16 @@ import java.util.Objects;
 @Slf4j
 public class RequestLogGlobalFilter implements GlobalFilter, Ordered
 {
+    /**
+     * 过滤器执行顺序：
+     * <p>负数：绝对值越小，越早执行（例如，-2 在 -1 之前执行）。</p>
+     * <p>零：在所有负数之后、所有正数之前执行。</p>
+     * <p>正数：值越小，越早执行（例如，1 在 2 之前执行）。</p>
+     *
+     * @author CAIXYPROMISE
+     * @version 1.0
+     * @since 2024/2/3 19:00
+     */
     private static final String INTERFACE_HOST = "http://localhost:8123";
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain)
@@ -69,6 +78,6 @@ public class RequestLogGlobalFilter implements GlobalFilter, Ordered
     @Override
     public int getOrder()
     {
-        return 0;
+        return -4;
     }
 }
