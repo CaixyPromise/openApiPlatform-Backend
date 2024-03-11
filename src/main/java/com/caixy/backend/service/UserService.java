@@ -51,6 +51,8 @@ public interface UserService extends IService<User> {
      */
     boolean isAdmin(HttpServletRequest request);
 
+    boolean addWalletBalance(Long userId, Long addPoints);
+
     /**
      * 用户注销
      *

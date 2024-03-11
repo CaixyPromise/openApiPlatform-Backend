@@ -1,6 +1,7 @@
 package com.caixy.backend.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.caixy.backend.common.ErrorCode;
@@ -181,10 +182,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     {
         // 仅管理员可查询
         Object userObj = request.getSession().getAttribute(UserConstant.USER_LOGIN_STATE);
-        User user = (User) userObj;
+        UserVO user = (UserVO) userObj;
         return user == null || !UserConstant.ADMIN_ROLE.equals(user.getUserRole());
     }
-
+    @Override
+    public boolean addWalletBalance(Long userId, Long addPoints) {
+        LambdaUpdateWrapper<User> userLambdaUpdateWrapper = new LambdaUpdateWrapper<>();
+        userLambdaUpdateWrapper.eq(User::getId, userId);
+        userLambdaUpdateWrapper.setSql("balance = balance + " + addPoints);
+        return this.update(userLambdaUpdateWrapper);
+    }
     /**
      * 用户注销
      *

@@ -1,8 +1,9 @@
 spring:
-  application:
-    name: openApiPlatformBackend
 #  profiles:
 #    active: dev
+  application:
+    name: openApiPlatformBackend
+
 
   # DataSource Config
   datasource:
@@ -87,3 +88,9 @@ thread-pool:
       queueCapacity: 30
       keepAliveSeconds: 120
       timeUnit: SECONDS
+alipay:
+  appId: your_app_id
+  appPrivateKey: your_app_private_key
+  alipayPublicKey: YOUR_ALIPAY_PUBLIC_KEY
+  notifyUrl: your_notify_url
+  isSandbox: true

@@ -1,0 +1,34 @@
+package com.caixy.backend.config;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import org.springframework.boot.jackson.JsonComponent;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+
+/**
+ * Json配置类：解决精度丢失问题
+ *
+ * @name: com.caixy.backend.config.JsonConfig
+ * @author: CAIXYPROMISE
+ * @since: 2024-03-11 05:03
+ **/
+@JsonComponent
+public class JsonConfig
+{
+    /**
+     * 添加 Long 转 json 精度丢失的配置
+     */
+    @Bean
+    public ObjectMapper jacksonObjectMapper(Jackson2ObjectMapperBuilder builder)
+    {
+        ObjectMapper objectMapper = builder.createXmlMapper(false).build();
+        SimpleModule module = new SimpleModule();
+        module.addSerializer(Long.class, ToStringSerializer.instance);
+        module.addSerializer(Long.TYPE, ToStringSerializer.instance);
+        objectMapper.registerModule(module);
+        return objectMapper;
+    }
+}
