@@ -54,25 +54,30 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     private String SALT;
 
     @Override
-    public long userRegister(String userAccount, String userPassword, String checkPassword)
+    public long userRegister(String userAccount, String userPassword, String checkPassword, String captchaId, String captchaCode)
     {
         // 1. 校验
         if (StringUtils.isAnyBlank(userAccount, userPassword, checkPassword))
         {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
         }
-        if (userAccount.length() < 4)
+        if (userAccount.length() < 4 || userAccount.length() > 12)
         {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户账号过短");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户账号长度不符合要求");
         }
-        if (userPassword.length() < 8 || checkPassword.length() < 8)
+        if (userPassword.length() < 8 || userPassword.length() > 20
+                || checkPassword.length() < 8 || checkPassword.length() > 20)
         {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户密码过短");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户密码长度不符合要求");
         }
         // 密码和校验密码相同
         if (!userPassword.equals(checkPassword))
         {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "两次输入的密码不一致");
+        }
+        if (!validatedCaptchaCode(captchaId, captchaCode))
+        {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "验证码错误");
         }
         synchronized (userAccount.intern())
         {
@@ -123,16 +128,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "账号错误");
         }
         // 1.2 校验验证码
-        Map<Object, Object> result = redisOperatorService.getHash(RedisConstant.CAPTCHA_CODE_KEY + captchaId);
-        if (result == null || result.isEmpty())
-        {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "验证码错误");
-        }
-        String redisCode = result.get("code").toString().trim();
-        String redisUuid = (String) result.get("uuid");
-        redisOperatorService.delete(RedisConstant.CAPTCHA_CODE_KEY + redisUuid);
-        // 验证码不区分大小写
-        if (!redisCode.equalsIgnoreCase(captcha.trim()))
+        if (!validatedCaptchaCode(captchaId, captcha))
         {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "验证码错误");
         }
@@ -185,13 +181,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         UserVO user = (UserVO) userObj;
         return user == null || !UserConstant.ADMIN_ROLE.equals(user.getUserRole());
     }
+
     @Override
-    public boolean addWalletBalance(Long userId, Long addPoints) {
+    public boolean addWalletBalance(Long userId, Long addPoints)
+    {
         LambdaUpdateWrapper<User> userLambdaUpdateWrapper = new LambdaUpdateWrapper<>();
         userLambdaUpdateWrapper.eq(User::getId, userId);
         userLambdaUpdateWrapper.setSql("balance = balance + " + addPoints);
         return this.update(userLambdaUpdateWrapper);
     }
+
     /**
      * 用户注销
      *
@@ -297,6 +296,22 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         queryWrapper.eq("email", email);
         return this.count(queryWrapper) > 0;
     }
+
+    private boolean validatedCaptchaCode(String captchaId, String captchaCode)
+    {
+        // 1.2 校验验证码
+        Map<Object, Object> result = redisOperatorService.getHash(RedisConstant.CAPTCHA_CODE_KEY + captchaId);
+        if (result == null || result.isEmpty())
+        {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "验证码错误");
+        }
+        String redisCode = result.get("code").toString().trim();
+        String redisUuid = (String) result.get("uuid");
+        redisOperatorService.delete(RedisConstant.CAPTCHA_CODE_KEY + redisUuid);
+        // 验证码不区分大小写
+        return redisCode.equalsIgnoreCase(captchaCode.trim());
+    }
+
 }
 
 

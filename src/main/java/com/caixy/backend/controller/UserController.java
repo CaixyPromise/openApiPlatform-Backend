@@ -81,11 +81,18 @@ public class UserController
         String userAccount = userRegisterRequest.getUserAccount();
         String userPassword = userRegisterRequest.getUserPassword();
         String checkPassword = userRegisterRequest.getCheckPassword();
-        if (StringUtils.isAnyBlank(userAccount, userPassword, checkPassword))
+        String captchaCode = userRegisterRequest.getCaptcha();
+        String captchaId = userRegisterRequest.getCaptchaId();
+        if (StringUtils.isAnyBlank(
+                userAccount,
+                userPassword,
+                checkPassword,
+                captchaCode,
+                captchaId))
         {
             return null;
         }
-        long result = userService.userRegister(userAccount, userPassword, checkPassword);
+        long result = userService.userRegister(userAccount, userPassword, checkPassword, captchaId, captchaCode);
         return ResultUtils.success(result);
     }
 
@@ -414,7 +421,7 @@ public class UserController
         {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        log.info("received request: {}",modifyPasswordRequest.toString());
+        log.info("received request: {}", modifyPasswordRequest.toString());
         // 1. 参数校验
         String userOldPassword = modifyPasswordRequest.getOldPassword();
         String checkPassword = modifyPasswordRequest.getNewPassword();

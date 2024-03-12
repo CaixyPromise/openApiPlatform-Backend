@@ -19,4 +19,9 @@ public class UserRegisterRequest implements Serializable {
     private String userPassword;
 
     private String checkPassword;
+
+    // 验证码的uuid
+    private String captchaId;
+    // 验证码
+    private String captcha;
 }

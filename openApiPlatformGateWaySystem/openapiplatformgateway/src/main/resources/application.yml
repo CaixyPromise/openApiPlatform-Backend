@@ -14,7 +14,7 @@ spring:
         - AddResponseHeader=from, open-api
       routes:
         - id: caixy-api-gateway
-          uri: http://localhost:8090
+          uri: http://localhost:12300
           predicates:
             - Path=/api/**
 
@@ -27,4 +27,4 @@ dubbo:
     port: -1
   registry:
     id: nacos-registry
-    address: nacos://localhost:8848
+    address: nacos://localhost:12300
